@@ -1,5 +1,5 @@
-virtualenv venv
-.\venv\Script\activate
-
+python -m pip install --upgrade pip
 pip install simpy
-pip install shpinx
+pip install sphinx
+pip install matplotlib
+pip install tqdm

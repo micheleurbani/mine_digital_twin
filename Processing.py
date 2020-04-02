@@ -379,7 +379,7 @@ def GA(initialPopSize,items):
             return x[:n]
 
     population = generateIndividuals(initialPopSize,items)
-    max_generations = 30
+    max_generations = 5
     stats = dict()
     stats['best'] = list()
     stats['average'] = list()
@@ -470,10 +470,6 @@ def mineMap(thresholds):
         for i in enumerate(site[1]):
             plt.scatter(i[1].coordinates[0],i[1].coordinates[1],label=i[1].__class__.__name__+str(i[0]),c=colors[site[0]])
             plt.annotate(i[1].__class__.__name__+str(i[0]),(i[1].coordinates[0],i[1].coordinates[1]))
-    # for s in enumerate(shovels):
-    #     plt.scatter(s[1].coordinates[0],s[1].coordinates[1],label=s[1].__class__.__name__+str(s[0]),c=colors[1])
-    # for d in enumerate(dumpsites):
-    #     plt.scatter(d[1].coordinates[0],d[1].coordinates[1],label=d[1].__class__.__name__+str(d[0]),c=colors[2])
     plt.title("Sites location on the map")
     plt.grid()
     plt.legend()

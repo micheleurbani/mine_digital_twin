@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Get Started &#8212; Mine Simulator 1.0.1 documentation</title>
+    <title>Get Started &#8212; Mine Digital Twin 1.0.2 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -107,6 +107,56 @@ Parameters which define the behaviour of trucks, shovels, dumpsites, and worksho
 <div class="section" id="matlab-interface">
 <h2>MatLab Interface<a class="headerlink" href="#matlab-interface" title="Permalink to this headline">¶</a></h2>
 <p>The script <code class="docutils literal notranslate"><span class="pre">simulation.m</span></code> shows how to call the Python script from MatLab environment. In the following we comment line by line how the script works.</p>
+<div class="section" id="trucks">
+<span id="id2"></span><h3>Trucks<a class="headerlink" href="#trucks" title="Permalink to this headline">¶</a></h3>
+<p>Trucks can serve both shovels and dumpsites and, as a general rule, they are sent where it is more convenient.</p>
+<p>Assignment of trucks is performed according to the following rule:</p>
+<div class="math notranslate nohighlight">
+\[t^* = \arg\min_{t \in T} \left( travel\_time(t) + waiting\_time(t) \right)\]</div>
+<p>where <span class="math notranslate nohighlight">\(T\)</span> is the set of targets, which depends on the next task that a truck have to perform, and it can be any of shovels, dumpsites, or workshops. The chosen target <span class="math notranslate nohighlight">\(t^*\)</span> depends in turn on two functions, i.e. <span class="math notranslate nohighlight">\(travel\_time\)</span> and <span class="math notranslate nohighlight">\(waiting\_time\)</span> to the target <span class="math notranslate nohighlight">\(t\)</span>.</p>
+<div class="section" id="truck-features">
+<h4>Truck Features<a class="headerlink" href="#truck-features" title="Permalink to this headline">¶</a></h4>
+<p>A truck is characterized by the following list of features, which are stored in the corresponding properties of an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">Truck</span></code>.</p>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">Mine.</code><code class="sig-name descname">Truck</code><span class="sig-paren">(</span><em class="sig-param">alpha</em>, <em class="sig-param">beta</em>, <em class="sig-param">muCorrective</em>, <em class="sig-param">sigmaCorrective</em>, <em class="sig-param">muPreventive</em>, <em class="sig-param">sigmaPreventive</em>, <em class="sig-param">Cc</em>, <em class="sig-param">Cp</em>, <em class="sig-param">p</em>, <em class="sig-param">env</em>, <em class="sig-param">id</em>, <em class="sig-param">shovels</em>, <em class="sig-param">dumpsites</em>, <em class="sig-param">workshops</em>, <em class="sig-param">muCapacity</em>, <em class="sig-param">sigmaCapacity</em><span class="sig-paren">)</span></dt>
+<dd><p>The class replicates the operations and maintenance process of a Truck. The following parameters must be passed to initialize the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>float</em>) – Scale parameter of Weibull distribution</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – Shape parameter of Weibull distribution</p></li>
+<li><p><strong>muCorrective</strong> (<em>float</em>) – Mean time to repair</p></li>
+<li><p><strong>sigmaCorrective</strong> (<em>float</em>) – Time to repair std. dev.</p></li>
+<li><p><strong>muPreventive</strong> (<em>float</em>) – Mean maintenance time</p></li>
+<li><p><strong>sigmaPreventive</strong> (<em>float</em>) – Maintenance time std. dev.</p></li>
+<li><p><strong>Cc</strong> (<em>float</em>) – Cost of corrective maintenance</p></li>
+<li><p><strong>Cp</strong> (<em>float</em>) – Cost of preventive maintenance</p></li>
+<li><p><strong>p</strong> (<em>float</em>) – Probability threshold for preventive maintenance</p></li>
+<li><p><strong>env</strong> (<em>obj</em>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">simpy.Environment</span></code> object</p></li>
+<li><p><strong>id</strong> (<em>int</em>) – Identification number</p></li>
+<li><p><strong>shovels</strong> (<em>list</em>) – The list of shovels in the system</p></li>
+<li><p><strong>dumpsites</strong> (<em>list</em>) – The list of dump sites in the system</p></li>
+<li><p><strong>workshops</strong> (<em>list</em>) – The list of workshops in the system</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Such features are partly specified in the external file <em>data/truck_data.csv</em> and partly are provided by the user.
+In particular, we are interested to adjust the parameter <strong>p</strong>, which determines the amount of preventive maintenance that is carried out on a truck.</p>
+<p>The workflow of a truck is described <a class="reference internal" href="workflows.html#truck-workflow"><span class="std std-ref">here</span></a>.</p>
+</div>
+</div>
+<div class="section" id="shovels">
+<h3>Shovels<a class="headerlink" href="#shovels" title="Permalink to this headline">¶</a></h3>
+<p>Shovels are located in specific sites in the mine</p>
+</div>
+<div class="section" id="dumpsites">
+<h3>DumpSites<a class="headerlink" href="#dumpsites" title="Permalink to this headline">¶</a></h3>
+<p>Dumpsites must be intended as sites where generic material is unloaded by trucks.
+There no dumpsites specifically designed for ore and waste, and the stockpile of a dumpsite is always increasing.</p>
+</div>
 </div>
 </div>
 
@@ -117,7 +167,7 @@ Parameters which define the behaviour of trucks, shovels, dumpsites, and worksho
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">Mine Simulator</a></h1>
+<h1 class="logo"><a href="index.html">Mine Digital Twin</a></h1>
 
 
 
