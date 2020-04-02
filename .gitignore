@@ -1,0 +1,7 @@
+venv/
+Matlab/
+__pycache__/
+desktop.ini
+.vscode/
+Documentation.Ink
+documentation/

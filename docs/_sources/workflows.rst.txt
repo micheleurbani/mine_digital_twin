@@ -1,0 +1,32 @@
+.. _workflows:
+
+Workflows
+=========
+
+The items in the mine interact with each other and follow a precise workflow. The workflow of each item is presented in the following.
+
+.. _truck_workflow:
+
+Trucks workflow
+---------------
+
+Truck workflow is summarized in the following flowchart.
+A truck could fail in any moment, excluded when it is under repair.
+
+.. image:: ../figures/truck_workflow.png
+
+.. _shovel_workflow:
+
+Shovels workflow
+----------------
+
+Shovel workflow is summarized in the following flowchart. The tasks to be performed are really easy; the shovel might fail in any moment
+
+.. image:: ../figures/shovel_workflow.png
+
+Map of the mine
+---------------
+
+In the following, a map of the mine is represented according to the actual configuration of sites.
+
+.. image:: ../figures/mine_map.png

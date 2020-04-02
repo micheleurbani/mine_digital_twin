@@ -1,0 +1,61 @@
+Introduction
+============
+
+The module is used to replicate the operations and maintenance (O&M) of a mine industry. The module is written in Python and it uses the package *SimPy* to implement a Discrete Event Simulation (DES) experiment.
+Different items can be modeled in our environment and in fact the environment works correctly only if we initialize at least one item of each class.
+
+Items of the mine environment are the following:
+
+* :ref:`Trucks <trucks>`: trucks objects are based on the class :class:`Mine.Truck`. During the course of the simulation they are subject to corrective and preventive maintenance, with a cost of corrective maintenance :math:`C_c` greater than the cost of preventive maintenance :math:`C_p`.
+
+* **Shovels**: are modeled using the class :class:`Mine.Shovel`. During the course of the simulation, they are subjected to both preventive and corrective maintenance intervention. Maintenance cost of shovels follows the assumption :math:`C_c > C_p`.
+
+* **DumpSites**: are modeled using the class :class:`Mine.DumpSite`. They are characterized by a serving time and by a :class:`simpy.Resource` property. The serving time is a property of the dumpsite and it is specified when the dumpsite is created. The :class:`simpy.Resource` is used to manage the queue of trucks.
+
+* **WorkShops**: are modeled using the class :class:`Mine.WorkShop`. The serving time of a workshop depends on the repair time of the item that is served. The queue of items (they could be both trucks or shovels) is managed by a :class:`simpy.PriorityResource`.
+
+In the next section - :ref:`Get Started <get_started>` - we show how to get started with the use of the library from both MatLab and Python environment.
+
+The documentation of the code is available at the following link :ref:`documentation`.
+
+.. _trucks:
+
+Trucks
+------
+
+Trucks can serve both shovels and dumpsites and, as a general rule, they are sent where it is more convenient.
+
+Assignment of trucks is performed according to the following rule:
+
+.. math::
+
+    t^* = \arg\min_{t \in T} \left( travel\_time(t) + waiting\_time(t) \right)
+
+where :math:`T` is the set of targets, which depends on the next task that a truck have to perform, and it can be any of shovels, dumpsites, or workshops. The chosen target :math:`t^*` depends in turn on two functions, i.e. :math:`travel\_time` and :math:`waiting\_time` to the target :math:`t`.
+
+Truck Features
+..............
+
+A truck is characterized by the following list of features, which are stored in the corresponding properties of an instance of :class:`Truck`.
+
+.. autoclass:: Mine.Truck
+    :noindex:
+
+Such features are partly specified in the external file *data/truck_data.csv* and partly are provided by the user.
+In particular, we are interested to adjust the parameter **p**, which determines the amount of preventive maintenance that is carried out on a truck.
+
+The workflow of a truck is described :ref:`here <truck_workflow>`.
+
+Shovels
+-------
+
+Shovels are located in specific sites in the mine
+
+DumpSites
+---------
+
+Dumpsites must be intended as sites where generic material is unloaded by trucks.
+There no dumpsites specifically designed for ore and waste, and the stockpile of a dumpsite is always increasing.
+
+.. todo:: Dumpsites for a specific purpose will be implemented. There will be dumpsites linked to a crusher for production of ore and waste, and there will be dumpsites for discharge of waste material.
+

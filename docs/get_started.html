@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Get Started &#8212; Mine Simulator 1.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Workflows" href="workflows.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="get-started">
+<span id="id1"></span><h1>Get Started<a class="headerlink" href="#get-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="python-setup">
+<h2>Python Setup<a class="headerlink" href="#python-setup" title="Permalink to this headline">¶</a></h2>
+<p>As far as I tested, no installation of Python on the user OS should be necessary. A Python virtualenvironment is already present in the local folder <cite>venv</cite> with all the packages required to run the simulation.</p>
+<p>The MatLab script calls the local virtualenvironment autonomously.</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">clear</span><span class="p">;</span> <span class="n">close</span> <span class="s">all</span><span class="p">;</span> <span class="n">clc</span>
+</pre></div>
+</div>
+<p>If a Python environment has not been specified, provide indications.:</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">exist</span><span class="p">(</span><span class="s">&#39;pe&#39;</span><span class="p">,</span> <span class="s">&#39;var&#39;</span><span class="p">)</span>
+    <span class="c">% Retrieve the path of the local folder</span>
+    <span class="n">localFolder</span> <span class="p">=</span> <span class="n">pwd</span><span class="p">;</span>
+    <span class="c">% Provide local python environment (important because required</span>
+    <span class="c">% libraries are installed there).</span>
+    <span class="n">pe</span> <span class="p">=</span> <span class="n">pyenv</span><span class="p">(</span><span class="s">&#39;Version&#39;</span><span class="p">,</span><span class="n">strcat</span><span class="p">(</span><span class="n">localFolder</span><span class="p">,</span><span class="s">&#39;/venv/Scripts/python.exe&#39;</span><span class="p">));</span>
+<span class="n">end</span>
+</pre></div>
+</div>
+<p>The thresholds for decisions about preventive maintenance are provided as arrays.:</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">shovelPolicy</span> <span class="p">=</span> <span class="p">[</span><span class="mf">0.004</span><span class="p">,</span> <span class="mf">0.008</span><span class="p">,</span> <span class="mf">0.006</span><span class="p">];</span>
+<span class="n">truckPolicy</span> <span class="p">=</span> <span class="p">[</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.05</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.05</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">];</span>
+<span class="n">SIM_TIME</span> <span class="p">=</span> <span class="mi">5600</span><span class="p">;</span>
+<span class="n">SEED</span> <span class="p">=</span> <span class="mi">42</span><span class="p">;</span>
+
+<span class="c">% Call the function `sim` to run the simulation.</span>
+<span class="n">output</span> <span class="p">=</span> <span class="n">sim</span><span class="p">(</span><span class="n">shovelPolicy</span><span class="p">,</span><span class="n">truckPolicy</span><span class="p">,</span><span class="n">SIM_TIME</span><span class="p">,</span><span class="n">SEED</span><span class="p">);</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="sim">
+<code class="sig-name descname">sim</code><span class="sig-paren">(</span><em class="sig-param">shovelPolicy</em>, <em class="sig-param">truckPolicy</em>, <em class="sig-param">SIM_TIME</em>, <em class="sig-param">SEED</em><span class="sig-paren">)</span><a class="headerlink" href="#sim" title="Permalink to this definition">¶</a></dt>
+<dd><p>SIM function call a MatLab interpreter and execute a single simulation experiment using the parameters provided below. Function variables include:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shovelPolicy</strong> (<em>array</em>) – an array with length from 1 to 4 where the thresholds to trigger preventive maintenance are stored.</p></li>
+<li><p><strong>truckPolicy</strong> (<em>array</em>) – an array with length from 1 to 30 where the thresholds to trigger preventive maintenance are stored.</p></li>
+<li><p><strong>SIM_TIME</strong> (<em>int</em>) – the length of the simulation horizon.</p></li>
+<li><p><strong>SEED</strong> (<em>int</em>) – a value provided for reproducibility of the simulation instance.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>More parameters about the simulation experiment are provided to the Python interpreter by means of dictionary. Those parameters are the number of dumpsites and the number of workshops.
+Parameters which define the behaviour of trucks, shovels, dumpsites, and workshops are defined in the relative files within the folder “data”.</p>
+<p>The function returns a strucs with the number of corrective and preventive interventions, and the stockpiles level histories.:</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span>output <span class="p">=</span><span class="w"> </span><span class="nf">sim</span><span class="p">(</span>shovelPolicy,truckPolicy,SIM_TIME,SEED<span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="c">% Specify parameters</span>
+    <span class="n">param</span> <span class="p">=</span> <span class="n">py</span><span class="p">.</span><span class="n">dict</span><span class="p">(</span><span class="c">...</span>
+        <span class="n">pyargs</span><span class="p">(</span><span class="c">...</span>
+        <span class="s">&#39;nTrucks&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="nb">length</span><span class="p">(</span><span class="n">truckPolicy</span><span class="p">)),</span> <span class="c">...      % Between 1 and 30</span>
+        <span class="s">&#39;nShovels&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="nb">length</span><span class="p">(</span><span class="n">shovelPolicy</span><span class="p">)),</span> <span class="c">...    % Between 1 and 4</span>
+        <span class="s">&#39;nDumpSites&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="c">...                     % Between 1 and 5</span>
+        <span class="s">&#39;nWorkShops&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="c">...                     % Between 1 and 3</span>
+        <span class="s">&#39;SIM_TIME&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="n">SIM_TIME</span><span class="p">),</span> <span class="c">...                % One year expressed in minutes</span>
+        <span class="s">&#39;SEED&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="n">SEED</span><span class="p">),</span> <span class="c">...</span>
+        <span class="s">&#39;thresholdsPM&#39;</span><span class="p">,</span> <span class="n">py</span><span class="p">.</span><span class="n">dict</span><span class="p">(</span><span class="c">...</span>
+            <span class="n">pyargs</span><span class="p">(</span><span class="c">...</span>
+                <span class="s">&#39;shovels&#39;</span><span class="p">,</span> <span class="n">py</span><span class="p">.</span><span class="n">list</span><span class="p">(</span><span class="n">shovelPolicy</span><span class="p">),</span> <span class="c">...</span>
+                <span class="s">&#39;trucks&#39;</span><span class="p">,</span> <span class="n">py</span><span class="p">.</span><span class="n">list</span><span class="p">(</span><span class="n">truckPolicy</span><span class="p">)</span> <span class="c">...</span>
+            <span class="p">)</span><span class="c">...</span>
+        <span class="p">)</span><span class="c">...</span>
+    <span class="p">));</span>
+
+    <span class="n">output</span> <span class="p">=</span> <span class="n">py</span><span class="p">.</span><span class="n">main</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">param</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Simulation results are delivered as a MatLab struct datetype. Conversion of Python datatypes to MatLab may result a little bit tricky at a first sight, therefore I omit to explain data conversion from Python here and I suggest to look only to the final result, namely to the <cite>output</cite> struct, which can be navigated easily.</p>
+</div>
+<div class="section" id="matlab-interface">
+<h2>MatLab Interface<a class="headerlink" href="#matlab-interface" title="Permalink to this headline">¶</a></h2>
+<p>The script <code class="docutils literal notranslate"><span class="pre">simulation.m</span></code> shows how to call the Python script from MatLab environment. In the following we comment line by line how the script works.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Mine Simulator</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Get Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#python-setup">Python Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#matlab-interface">MatLab Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="introduction.html" title="previous chapter">Introduction</a></li>
+      <li>Next: <a href="workflows.html" title="next chapter">Workflows</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Michele Urbani.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/get_started.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

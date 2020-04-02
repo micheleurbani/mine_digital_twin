@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Documentation of Mine.py &#8212; Mine Simulator 1.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Workflows" href="workflows.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="documentation-of-mine-py">
+<span id="documentation"></span><h1>Documentation of Mine.py<a class="headerlink" href="#documentation-of-mine-py" title="Permalink to this headline">¶</a></h1>
+<p>In the following, the documentation of the classes in the module Mine.py is produced automatically.
+<em>Mine.py</em> contains all the classes for the objects currently in use in the simulation and the simulation procedures as presented in <a class="reference internal" href="get_started.html#get-started"><span class="std std-ref">Get Started</span></a>.
+At the bottom of the page, the documentation of some <a class="reference internal" href="#simpy-resources"><span class="std std-ref">Simpy resources</span></a> classes is reported.</p>
+<span class="target" id="module-Mine"></span><dl class="class">
+<dt id="Mine.DumpSite">
+<em class="property">class </em><code class="sig-prename descclassname">Mine.</code><code class="sig-name descname">DumpSite</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">id</em>, <em class="sig-param">coordinates</em>, <em class="sig-param">mu</em>, <em class="sig-param">sigma</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.DumpSite" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class inherits the basic attributes from <a class="reference internal" href="#Mine.Server" title="Mine.Server"><code class="xref py py-class docutils literal notranslate"><span class="pre">Server</span></code></a> and replicates the behavior of a dumpsite.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="Mine.Server">
+<em class="property">class </em><code class="sig-prename descclassname">Mine.</code><code class="sig-name descname">Server</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">id</em>, <em class="sig-param">coordinates</em>, <em class="sig-param">mu=None</em>, <em class="sig-param">sigma=None</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Server" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class with the common attributes and methods of all server entities within the simulation.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="Mine.Shovel">
+<em class="property">class </em><code class="sig-prename descclassname">Mine.</code><code class="sig-name descname">Shovel</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">id</em>, <em class="sig-param">coordinates</em>, <em class="sig-param">mu</em>, <em class="sig-param">sigma</em>, <em class="sig-param">alpha</em>, <em class="sig-param">beta</em>, <em class="sig-param">muPreventive</em>, <em class="sig-param">sigmaPreventive</em>, <em class="sig-param">muCorrective</em>, <em class="sig-param">sigmaCorrective</em>, <em class="sig-param">Cc</em>, <em class="sig-param">Cp</em>, <em class="sig-param">p</em>, <em class="sig-param">workshops</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Shovel" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class inherits the basic attributes from <a class="reference internal" href="#Mine.Server" title="Mine.Server"><code class="xref py py-class docutils literal notranslate"><span class="pre">Server</span></code></a>. It includes the method to replicate the operations in case of preventive maintenance of a shovel.</p>
+<dl class="method">
+<dt id="Mine.Shovel.doPreventiveMaintenance">
+<code class="sig-name descname">doPreventiveMaintenance</code><span class="sig-paren">(</span><em class="sig-param">expTaskTime</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Shovel.doPreventiveMaintenance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The decision rule to trigger a preventive maintenance intervention is enclosed in the method. The rule used is the following.</p>
+<div class="math notranslate nohighlight">
+\[P(t &lt; T &lt; \Delta t | T &gt; t) &gt; \text{threshold}\]</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="Mine.Shovel.preventiveMaintenance">
+<code class="sig-name descname">preventiveMaintenance</code><span class="sig-paren">(</span><em class="sig-param">workshop</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Shovel.preventiveMaintenance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The method is a generator function which replicates the maintenance operations for a shovel in case of preventive maintenance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Mine.Truck">
+<em class="property">class </em><code class="sig-prename descclassname">Mine.</code><code class="sig-name descname">Truck</code><span class="sig-paren">(</span><em class="sig-param">alpha</em>, <em class="sig-param">beta</em>, <em class="sig-param">muCorrective</em>, <em class="sig-param">sigmaCorrective</em>, <em class="sig-param">muPreventive</em>, <em class="sig-param">sigmaPreventive</em>, <em class="sig-param">Cc</em>, <em class="sig-param">Cp</em>, <em class="sig-param">p</em>, <em class="sig-param">env</em>, <em class="sig-param">id</em>, <em class="sig-param">shovels</em>, <em class="sig-param">dumpsites</em>, <em class="sig-param">workshops</em>, <em class="sig-param">muCapacity</em>, <em class="sig-param">sigmaCapacity</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Truck" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class replicates the operations and maintenance process of a Truck. The following parameters must be passed to initialize the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>float</em>) – Scale parameter of Weibull distribution</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – Shape parameter of Weibull distribution</p></li>
+<li><p><strong>muCorrective</strong> (<em>float</em>) – Mean time to repair</p></li>
+<li><p><strong>sigmaCorrective</strong> (<em>float</em>) – Time to repair std. dev.</p></li>
+<li><p><strong>muPreventive</strong> (<em>float</em>) – Mean maintenance time</p></li>
+<li><p><strong>sigmaPreventive</strong> (<em>float</em>) – Maintenance time std. dev.</p></li>
+<li><p><strong>Cc</strong> (<em>float</em>) – Cost of corrective maintenance</p></li>
+<li><p><strong>Cp</strong> (<em>float</em>) – Cost of preventive maintenance</p></li>
+<li><p><strong>p</strong> (<em>float</em>) – Probability threshold for preventive maintenance</p></li>
+<li><p><strong>env</strong> (<em>obj</em>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">simpy.Environment</span></code> object</p></li>
+<li><p><strong>id</strong> (<em>int</em>) – Identification number</p></li>
+<li><p><strong>shovels</strong> (<em>list</em>) – The list of shovels in the system</p></li>
+<li><p><strong>dumpsites</strong> (<em>list</em>) – The list of dump sites in the system</p></li>
+<li><p><strong>workshops</strong> (<em>list</em>) – The list of workshops in the system</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="Mine.Truck.assignment">
+<code class="sig-name descname">assignment</code><span class="sig-paren">(</span><em class="sig-param">items</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Truck.assignment" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function returns the item <span class="math notranslate nohighlight">\(i\)</span> (shovel, dumpsite, workshop) to which the Truck is assigned among a set of items <span class="math notranslate nohighlight">\(I\)</span>, which is provided as a list.
+The value <span class="math notranslate nohighlight">\(i\)</span> is returned by the following equation.</p>
+<div class="math notranslate nohighlight">
+\[\text{argmin}_{i \in I} = \mathbb{E} [ \text{travel distance to $i$} ] + \mathbb{E} [ \text{waiting time at $i$} ]\]</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="Mine.Truck.doPreventiveMaintenance">
+<code class="sig-name descname">doPreventiveMaintenance</code><span class="sig-paren">(</span><em class="sig-param">expTaskTime</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Truck.doPreventiveMaintenance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The decision rule to trigger a preventive maintenance intervention is enclosed in the method. The rule used is the following.</p>
+<div class="math notranslate nohighlight">
+\[P(t &lt; T &lt; \Delta t | T &gt; t) &gt; \text{threshold}\]</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="Mine.Truck.fault">
+<code class="sig-name descname">fault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Truck.fault" title="Permalink to this definition">¶</a></dt>
+<dd><p>The method generates a fault every now and then.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Mine.Truck.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">shovels</em>, <em class="sig-param">dumpsites</em>, <em class="sig-param">workshops</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Truck.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>The method is a generator function which returns the event linked with the operations of a truck.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Mine.WorkShop">
+<em class="property">class </em><code class="sig-prename descclassname">Mine.</code><code class="sig-name descname">WorkShop</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">id</em>, <em class="sig-param">coordinates</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.WorkShop" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class inherits the basic attributes from <a class="reference internal" href="#Mine.Server" title="Mine.Server"><code class="xref py py-class docutils literal notranslate"><span class="pre">Server</span></code></a> and replicates the behavior of a workshop.
+The serving time depends on the repair time of the item under repair and on the type of maintenance, i.e., corrective or preventive.</p>
+</dd></dl>
+
+<div class="section" id="simpy-resources">
+<span id="id1"></span><h2>Simpy resources<a class="headerlink" href="#simpy-resources" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simpy.Resource">
+<em class="property">class </em><code class="sig-prename descclassname">simpy.</code><code class="sig-name descname">Resource</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">capacity=1</em><span class="sig-paren">)</span><a class="headerlink" href="#simpy.Resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resource with <em>capacity</em> of usage slots that can be requested by
+processes.</p>
+<p>If all slots are taken, requests are enqueued. Once a usage request is
+released, a pending request will be triggered.</p>
+<p>The <em>env</em> parameter is the <code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code> instance the
+resource is bound to.</p>
+<dl class="method">
+<dt id="simpy.Resource.count">
+<em class="property">property </em><code class="sig-name descname">count</code><a class="headerlink" href="#simpy.Resource.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of users currently using the resource.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpy.Resource.queue">
+<code class="sig-name descname">queue</code><em class="property"> = None</em><a class="headerlink" href="#simpy.Resource.queue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Queue of pending <code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code> events. Alias of
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">put_queue</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpy.Resource.release">
+<code class="sig-name descname">release</code><a class="headerlink" href="#simpy.Resource.release" title="Permalink to this definition">¶</a></dt>
+<dd><p>Release a usage slot.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Release</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpy.Resource.request">
+<code class="sig-name descname">request</code><a class="headerlink" href="#simpy.Resource.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request a usage slot.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpy.Resource.users">
+<code class="sig-name descname">users</code><em class="property"> = None</em><a class="headerlink" href="#simpy.Resource.users" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of <code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code> events for the processes that are currently
+using the resource.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="simpy.PriorityResource">
+<em class="property">class </em><code class="sig-prename descclassname">simpy.</code><code class="sig-name descname">PriorityResource</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">capacity=1</em><span class="sig-paren">)</span><a class="headerlink" href="#simpy.PriorityResource" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">Resource</span></code> supporting prioritized
+requests.</p>
+<p>Pending requests in the <a class="reference internal" href="#simpy.Resource.queue" title="simpy.Resource.queue"><code class="xref py py-attr docutils literal notranslate"><span class="pre">queue</span></code></a> are sorted in ascending
+order by their <em>priority</em> (that means lower values are more important).</p>
+<dl class="attribute">
+<dt id="simpy.PriorityResource.GetQueue">
+<code class="sig-name descname">GetQueue</code><a class="headerlink" href="#simpy.PriorityResource.GetQueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">builtins.list</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpy.PriorityResource.PutQueue">
+<code class="sig-name descname">PutQueue</code><a class="headerlink" href="#simpy.PriorityResource.PutQueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of the put queue. See
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">put_queue</span></code> for details.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">SortedQueue</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpy.PriorityResource.release">
+<code class="sig-name descname">release</code><a class="headerlink" href="#simpy.PriorityResource.release" title="Permalink to this definition">¶</a></dt>
+<dd><p>Release a usage slot.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Release</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpy.PriorityResource.request">
+<code class="sig-name descname">request</code><a class="headerlink" href="#simpy.PriorityResource.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request a usage slot with the given <em>priority</em>.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PriorityRequest</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Mine Simulator</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#simpy-resources">Simpy resources</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="workflows.html" title="previous chapter">Workflows</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Michele Urbani.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/documentation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

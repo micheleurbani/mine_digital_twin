@@ -1,0 +1,22 @@
+.. Mine Maintenance Sim documentation master file, created by
+   sphinx-quickstart on Mon Feb 10 09:27:12 2020.
+   You can adapt this file completely to your liking, but it should at least contain the root `toctree` directive.
+
+Welcome to Mine Maintenance Simulator documentation!
+====================================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   Introduction <introduction>
+   Get Started <get_started>
+   Workflows <workflows>
+   Documentation <documentation>
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
