@@ -1,0 +1,154 @@
+.. _items_summary::
+
+Items Summary
+=============
+
+The main hallmarks of the items that can be modeled is presented in the following.
+
+.. _trucks:
+
+Trucks
+------
+
+Trucks can serve both shovels and dumpsites and, as a general rule, they are sent where it is more convenient departing from the site where they are.
+
+Assignment of trucks is performed according to the following rule:
+
+
+.. math:: t^* = \arg\min_{t \in T} = \mathbb{E} [ travel\_distance(t) ] + \mathbb{E} [ waiting\_time(t) ]
+    :label: selection_rule
+
+where :math:`T` is the set of targets, which depends on the next task that a truck have to perform, and it can be any of shovels, dumpsites, or workshops. The chosen target :math:`t^*` depends in turn on two functions, i.e. :math:`\mathbb{E}[travel\_time]` and :math:`\mathbb{E}[waiting\_time]` to the target :math:`t`.
+
+Truck Features
+..............
+
+A truck is characterized by the following list of features, which are stored in the corresponding properties of an instance of :class:`Truck`.
+
+.. autoclass:: Mine.Truck
+    :noindex:
+
+Such features are partly specified in the external file *data/truck_data.csv* and partly are provided by the user.
+Among the user specified parameters, we are interested to adjust the parameter **p**, which determines the amount of preventive maintenance that is carried out on a truck.
+
+The following table summarize the meaning of the parameters stored in the file *data/truck_data.csv*.
+
++------------+------------------------------------------------------------------------------------------+
+|Column Index|Meaning                                                                                   |
++============+==========================================================================================+
+|1           |Scale parameter of the time to failure (Weibull) distribution                             |
++------------+------------------------------------------------------------------------------------------+
+|2           |Shape parameter of the time to failure (Weibull) distribution                             |
++------------+------------------------------------------------------------------------------------------+
+|3           |Cost of corrective maintenance :math:`C_c`                                                |
++------------+------------------------------------------------------------------------------------------+
+|4           |Cost of preventive maintenance :math:`C_p`                                                |
++------------+------------------------------------------------------------------------------------------+
+|5           |Mean of the time to repair (lognormal) distribution in case of preventive maintenance     |
++------------+------------------------------------------------------------------------------------------+
+|6           |St. dev. of the time to repair (lognormal) distribution in case of preventive maintenance |
++------------+------------------------------------------------------------------------------------------+
+|7           |Mean of the time to repair (lognormal) distribution in case of corrective maintenance     |
++------------+------------------------------------------------------------------------------------------+
+|8           |St. dev. of the time to repair (lognormal) distribution in case of corrective maintenance |
++------------+------------------------------------------------------------------------------------------+
+|9           |Mean of the amount of material (normal) distribution that is moved each time              |
++------------+------------------------------------------------------------------------------------------+
+|10          |St. dev. of the amount of material (normal) distribution that is moved each time          |
++------------+------------------------------------------------------------------------------------------+
+
+The workflow of a truck is described :ref:`here <truck_workflow>`.
+
+Shovels
+-------
+
+Shovels are located at specific sites of the mine and the coordinates of a shovel are provided through the file *data/shovels_data.csv*.
+
+Shovels can break at any time, during serving of a truck or when they are idle.
+When a break occurs, the shovel is sent to the "best" maintenance workshop, which is selected using the rule :eq:`selection_rule`.
+Once a shovel is back to its site it is immediately available.
+
+.. raw:: html
+
+    <font color="red">If a shovel breaks while serving a truck, that truck and all the truck in the queue will wait until the shovel is available again.</font>
+
+.. todo::
+
+    Change the behavior of truck waiting in queue and assign them to another shovel.
+
+.. autoclass:: Mine.Shovel
+    :noindex:
+
+Shovel Features
+...............
+
+The following table summarize the meaning of the parameters stored in the file *data/shovels_data.csv*.
+
++------------+------------------------------------------------------------------------------------------+
+|Column Index|Meaning                                                                                   |
++============+==========================================================================================+
+|1           |*x* coordinate of the site                                                                |
++------------+------------------------------------------------------------------------------------------+
+|2           |*y* coordinate of the site                                                                |
++------------+------------------------------------------------------------------------------------------+
+|3           |Mean of the serving time (lognormal) distributoin                                         |
++------------+------------------------------------------------------------------------------------------+
+|4           |St. dev. of the serving time (lognormal) distributoin                                     |
++------------+------------------------------------------------------------------------------------------+
+|5           |Mean of the time to repair (lognormal) distribution in case of preventive maintenance     |
++------------+------------------------------------------------------------------------------------------+
+|6           |St. dev. of the time to repair (lognormal) distribution in case of preventive maintenance |
++------------+------------------------------------------------------------------------------------------+
+|7           |Mean of the time to repair (lognormal) distribution in case of corrective maintenance     |
++------------+------------------------------------------------------------------------------------------+
+|8           |St. dev. of the time to repair (lognormal) distribution in case of corrective maintenance |
++------------+------------------------------------------------------------------------------------------+
+|9           |Scale parameter of the time to failure (Weibull) distribution                             |
++------------+------------------------------------------------------------------------------------------+
+|10          |Shape parameter of the time to failure (Weibull) distribution                             |
++------------+------------------------------------------------------------------------------------------+
+|11          |Cost of corrective maintenance :math:`C_c`                                                |
++------------+------------------------------------------------------------------------------------------+
+|12          |Cost of preventive maintenance :math:`C_p`                                                |
++------------+------------------------------------------------------------------------------------------+
+
+The workflow of a shovel is described :ref:`here <shovel_workflow>`.
+
+DumpSites
+---------
+
+Dumpsites must be intended as sites where generic material is unloaded by trucks.
+There are no dumpsites specifically designed for ore and waste, and the stockpile of a dumpsite is always increasing.
+
+.. todo:: Dumpsites for a specific purpose will be implemented. There will be dumpsites linked to a crusher for production of ore and waste, and there will be dumpsites for discharge of waste material.
+
+The external file *data/dumpsites_data.csv* store the following specifications.
+
++------------+------------------------------------------------------------------------------------------+
+|Column Index|Meaning                                                                                   |
++============+==========================================================================================+
+|1           |Mean of the serving time (lognormal) distributoin                                         |
++------------+------------------------------------------------------------------------------------------+
+|2           |St. dev. of the serving time (lognormal) distributoin                                     |
++------------+------------------------------------------------------------------------------------------+
+|3           |*x* coordinate of the site                                                                |
++------------+------------------------------------------------------------------------------------------+
+|4           |*y* coordinate of the site                                                                |
++------------+------------------------------------------------------------------------------------------+
+
+Workshops
+---------
+
+A workshop can repair both shovels and trucks.
+An item is repair according to the type of failure (i.e. corrective or preventive) and its time to repair distribution.
+
+The position of a workshop on the map is specified in the file *data/workshop_data.csv*.
+Within the file each row corresponds to a workshop and the columns provide the following information:
+
++------------+------------------------------------------------------------------------------------------+
+|Column Index|Meaning                                                                                   |
++============+==========================================================================================+
+|1           |*x* coordinate of the site                                                                |
++------------+------------------------------------------------------------------------------------------+
+|2           |*y* coordinate of the site                                                                |
++------------+------------------------------------------------------------------------------------------+

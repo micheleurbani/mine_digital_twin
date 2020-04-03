@@ -1,0 +1,358 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Items Summary &#8212; Mine Digital Twin 1.0.2 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Workflows" href="workflows.html" />
+    <link rel="prev" title="Get Started" href="get_started.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="items-summary">
+<h1>Items Summary<a class="headerlink" href="#items-summary" title="Permalink to this headline">¶</a></h1>
+<p>The main hallmarks of the items that can be modeled is presented in the following.</p>
+<div class="section" id="trucks">
+<span id="id1"></span><h2>Trucks<a class="headerlink" href="#trucks" title="Permalink to this headline">¶</a></h2>
+<p>Trucks can serve both shovels and dumpsites and, as a general rule, they are sent where it is more convenient departing from the site where they are.</p>
+<p>Assignment of trucks is performed according to the following rule:</p>
+<div class="math notranslate nohighlight" id="equation-selection-rule">
+<span class="eqno">(1)<a class="headerlink" href="#equation-selection-rule" title="Permalink to this equation">¶</a></span>\[t^* = \arg\min_{t \in T} = \mathbb{E} [ travel\_distance(t) ] + \mathbb{E} [ waiting\_time(t) ]\]</div>
+<p>where <span class="math notranslate nohighlight">\(T\)</span> is the set of targets, which depends on the next task that a truck have to perform, and it can be any of shovels, dumpsites, or workshops. The chosen target <span class="math notranslate nohighlight">\(t^*\)</span> depends in turn on two functions, i.e. <span class="math notranslate nohighlight">\(\mathbb{E}[travel\_time]\)</span> and <span class="math notranslate nohighlight">\(\mathbb{E}[waiting\_time]\)</span> to the target <span class="math notranslate nohighlight">\(t\)</span>.</p>
+<div class="section" id="truck-features">
+<h3>Truck Features<a class="headerlink" href="#truck-features" title="Permalink to this headline">¶</a></h3>
+<p>A truck is characterized by the following list of features, which are stored in the corresponding properties of an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">Truck</span></code>.</p>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">Mine.</code><code class="sig-name descname">Truck</code><span class="sig-paren">(</span><em class="sig-param">alpha</em>, <em class="sig-param">beta</em>, <em class="sig-param">muCorrective</em>, <em class="sig-param">sigmaCorrective</em>, <em class="sig-param">muPreventive</em>, <em class="sig-param">sigmaPreventive</em>, <em class="sig-param">Cc</em>, <em class="sig-param">Cp</em>, <em class="sig-param">p</em>, <em class="sig-param">env</em>, <em class="sig-param">id</em>, <em class="sig-param">shovels</em>, <em class="sig-param">dumpsites</em>, <em class="sig-param">workshops</em>, <em class="sig-param">muCapacity</em>, <em class="sig-param">sigmaCapacity</em><span class="sig-paren">)</span></dt>
+<dd><p>The class replicates the operations and maintenance process of a Truck. The following parameters must be passed to initialize the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>float</em>) – Scale parameter of Weibull distribution</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – Shape parameter of Weibull distribution</p></li>
+<li><p><strong>muCorrective</strong> (<em>float</em>) – Mean time to repair</p></li>
+<li><p><strong>sigmaCorrective</strong> (<em>float</em>) – Time to repair std. dev.</p></li>
+<li><p><strong>muPreventive</strong> (<em>float</em>) – Mean maintenance time</p></li>
+<li><p><strong>sigmaPreventive</strong> (<em>float</em>) – Maintenance time std. dev.</p></li>
+<li><p><strong>Cc</strong> (<em>float</em>) – Cost of corrective maintenance</p></li>
+<li><p><strong>Cp</strong> (<em>float</em>) – Cost of preventive maintenance</p></li>
+<li><p><strong>p</strong> (<em>float</em>) – Probability threshold for preventive maintenance</p></li>
+<li><p><strong>env</strong> (<em>obj</em>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">simpy.Environment</span></code> object</p></li>
+<li><p><strong>id</strong> (<em>int</em>) – Identification number</p></li>
+<li><p><strong>shovels</strong> (<em>list</em>) – The list of shovels in the system</p></li>
+<li><p><strong>dumpsites</strong> (<em>list</em>) – The list of dump sites in the system</p></li>
+<li><p><strong>workshops</strong> (<em>list</em>) – The list of workshops in the system</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Such features are partly specified in the external file <em>data/truck_data.csv</em> and partly are provided by the user.
+Among the user specified parameters, we are interested to adjust the parameter <strong>p</strong>, which determines the amount of preventive maintenance that is carried out on a truck.</p>
+<p>The following table summarize the meaning of the parameters stored in the file <em>data/truck_data.csv</em>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column Index</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>Scale parameter of the time to failure (Weibull) distribution</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>Shape parameter of the time to failure (Weibull) distribution</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>Cost of corrective maintenance <span class="math notranslate nohighlight">\(C_c\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>Cost of preventive maintenance <span class="math notranslate nohighlight">\(C_p\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>Mean of the time to repair (lognormal) distribution in case of preventive maintenance</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>St. dev. of the time to repair (lognormal) distribution in case of preventive maintenance</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>Mean of the time to repair (lognormal) distribution in case of corrective maintenance</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>St. dev. of the time to repair (lognormal) distribution in case of corrective maintenance</p></td>
+</tr>
+<tr class="row-even"><td><p>9</p></td>
+<td><p>Mean of the amount of material (normal) distribution that is moved each time</p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>St. dev. of the amount of material (normal) distribution that is moved each time</p></td>
+</tr>
+</tbody>
+</table>
+<p>The workflow of a truck is described <a class="reference internal" href="workflows.html#truck-workflow"><span class="std std-ref">here</span></a>.</p>
+</div>
+</div>
+<div class="section" id="shovels">
+<h2>Shovels<a class="headerlink" href="#shovels" title="Permalink to this headline">¶</a></h2>
+<p>Shovels are located at specific sites of the mine and the coordinates of a shovel are provided through the file <em>data/shovels_data.csv</em>.</p>
+<p>Shovels can break at any time, during serving of a truck or when they are idle.
+When a break occurs, the shovel is sent to the “best” maintenance workshop, which is selected using the rule <a class="reference internal" href="#equation-selection-rule">(1)</a>.
+Once a shovel is back to its site it is immediately available.</p>
+<font color="red">If a shovel breaks while serving a truck, that truck and all the truck in the queue will wait until the shovel is available again.</font><div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>Change the behavior of truck waiting in queue and assign them to another shovel.</p>
+</div>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">Mine.</code><code class="sig-name descname">Shovel</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">id</em>, <em class="sig-param">coordinates</em>, <em class="sig-param">mu</em>, <em class="sig-param">sigma</em>, <em class="sig-param">alpha</em>, <em class="sig-param">beta</em>, <em class="sig-param">muPreventive</em>, <em class="sig-param">sigmaPreventive</em>, <em class="sig-param">muCorrective</em>, <em class="sig-param">sigmaCorrective</em>, <em class="sig-param">Cc</em>, <em class="sig-param">Cp</em>, <em class="sig-param">p</em>, <em class="sig-param">workshops</em><span class="sig-paren">)</span></dt>
+<dd><p>The class inherits the basic attributes from <a class="reference internal" href="documentation.html#Mine.Server" title="Mine.Server"><code class="xref py py-class docutils literal notranslate"><span class="pre">Server</span></code></a>. It includes the method to replicate the operations in case of preventive maintenance of a shovel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>env</strong> (<em>obj</em>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">simpy.Environment</span></code> object</p></li>
+<li><p><strong>id</strong> (<em>int</em>) – Identification number</p></li>
+<li><p><strong>coordinates</strong> (<em>tuple</em>) – the (<em>x</em>, <em>y</em>) coordinates of the site on the map</p></li>
+<li><p><strong>mu</strong> (<em>float</em>) – mean of the (lognormal) serving time distribution</p></li>
+<li><p><strong>sigma</strong> (<em>float</em>) – st. dev. of the (lognormal) serving time distribution</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Scale parameter of Weibull distribution</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – Shape parameter of Weibull distribution</p></li>
+<li><p><strong>muCorrective</strong> (<em>float</em>) – Mean time to repair</p></li>
+<li><p><strong>sigmaCorrective</strong> (<em>float</em>) – Time to repair std. dev.</p></li>
+<li><p><strong>muPreventive</strong> (<em>float</em>) – Mean maintenance time</p></li>
+<li><p><strong>sigmaPreventive</strong> (<em>float</em>) – Maintenance time std. dev.</p></li>
+<li><p><strong>Cc</strong> (<em>float</em>) – Cost of corrective maintenance</p></li>
+<li><p><strong>Cp</strong> (<em>float</em>) – Cost of preventive maintenance</p></li>
+<li><p><strong>p</strong> (<em>float</em>) – Probability threshold for preventive maintenance</p></li>
+<li><p><strong>workshops</strong> (<em>list</em>) – The list of workshops in the system</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="section" id="shovel-features">
+<h3>Shovel Features<a class="headerlink" href="#shovel-features" title="Permalink to this headline">¶</a></h3>
+<p>The following table summarize the meaning of the parameters stored in the file <em>data/shovels_data.csv</em>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column Index</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p><em>x</em> coordinate of the site</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p><em>y</em> coordinate of the site</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>Mean of the serving time (lognormal) distributoin</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>St. dev. of the serving time (lognormal) distributoin</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>Mean of the time to repair (lognormal) distribution in case of preventive maintenance</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>St. dev. of the time to repair (lognormal) distribution in case of preventive maintenance</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>Mean of the time to repair (lognormal) distribution in case of corrective maintenance</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>St. dev. of the time to repair (lognormal) distribution in case of corrective maintenance</p></td>
+</tr>
+<tr class="row-even"><td><p>9</p></td>
+<td><p>Scale parameter of the time to failure (Weibull) distribution</p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>Shape parameter of the time to failure (Weibull) distribution</p></td>
+</tr>
+<tr class="row-even"><td><p>11</p></td>
+<td><p>Cost of corrective maintenance <span class="math notranslate nohighlight">\(C_c\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>Cost of preventive maintenance <span class="math notranslate nohighlight">\(C_p\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p>The workflow of a shovel is described <a class="reference internal" href="workflows.html#shovel-workflow"><span class="std std-ref">here</span></a>.</p>
+</div>
+</div>
+<div class="section" id="dumpsites">
+<h2>DumpSites<a class="headerlink" href="#dumpsites" title="Permalink to this headline">¶</a></h2>
+<p>Dumpsites must be intended as sites where generic material is unloaded by trucks.
+There are no dumpsites specifically designed for ore and waste, and the stockpile of a dumpsite is always increasing.</p>
+<div class="admonition-todo admonition" id="id3">
+<p class="admonition-title">Todo</p>
+<p>Dumpsites for a specific purpose will be implemented. There will be dumpsites linked to a crusher for production of ore and waste, and there will be dumpsites for discharge of waste material.</p>
+</div>
+<p>The external file <em>data/dumpsites_data.csv</em> store the following specifications.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column Index</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>Mean of the serving time (lognormal) distributoin</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>St. dev. of the serving time (lognormal) distributoin</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p><em>x</em> coordinate of the site</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p><em>y</em> coordinate of the site</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="workshops">
+<h2>Workshops<a class="headerlink" href="#workshops" title="Permalink to this headline">¶</a></h2>
+<p>A workshop can repair both shovels and trucks.
+An item is repair according to the type of failure (i.e. corrective or preventive) and its time to repair distribution.</p>
+<p>The position of a workshop on the map is specified in the file <em>data/workshop_data.csv</em>.
+Within the file each row corresponds to a workshop and the columns provide the following information:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column Index</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p><em>x</em> coordinate of the site</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p><em>y</em> coordinate of the site</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Mine Digital Twin</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Items Summary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#trucks">Trucks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#shovels">Shovels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dumpsites">DumpSites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#workshops">Workshops</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="get_started.html" title="previous chapter">Get Started</a></li>
+      <li>Next: <a href="workflows.html" title="next chapter">Workflows</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Michele Urbani.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/items_summary.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
