@@ -273,6 +273,22 @@ class Server(object):
 class Shovel(Server):
     """
     The class inherits the basic attributes from :class:`Server`. It includes the method to replicate the operations in case of preventive maintenance of a shovel.
+
+    :param obj env: A :class:`simpy.Environment` object
+    :param int id: Identification number
+    :param tuple coordinates: the (*x*, *y*) coordinates of the site on the map
+    :param float mu: mean of the (lognormal) serving time distribution
+    :param float sigma: st. dev. of the (lognormal) serving time distribution
+    :param float alpha: Scale parameter of Weibull distribution
+    :param float beta: Shape parameter of Weibull distribution
+    :param float muCorrective: Mean time to repair
+    :param float sigmaCorrective: Time to repair std. dev.
+    :param float muPreventive: Mean maintenance time
+    :param float sigmaPreventive: Maintenance time std. dev.
+    :param float Cc: Cost of corrective maintenance
+    :param float Cp: Cost of preventive maintenance
+    :param float p: Probability threshold for preventive maintenance
+    :param list workshops: The list of workshops in the system
     """
 
     def __init__(

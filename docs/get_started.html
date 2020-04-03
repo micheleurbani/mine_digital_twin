@@ -15,7 +15,7 @@
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Workflows" href="workflows.html" />
+    <link rel="next" title="Items Summary" href="items_summary.html" />
     <link rel="prev" title="Introduction" href="introduction.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -75,6 +75,12 @@
 <li><p><strong>SEED</strong> (<em>int</em>) – a value provided for reproducibility of the simulation instance.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a variable of the type <em>struct</em> containing the results of the simulation</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>struct</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -107,56 +113,6 @@ Parameters which define the behaviour of trucks, shovels, dumpsites, and worksho
 <div class="section" id="matlab-interface">
 <h2>MatLab Interface<a class="headerlink" href="#matlab-interface" title="Permalink to this headline">¶</a></h2>
 <p>The script <code class="docutils literal notranslate"><span class="pre">simulation.m</span></code> shows how to call the Python script from MatLab environment. In the following we comment line by line how the script works.</p>
-<div class="section" id="trucks">
-<span id="id2"></span><h3>Trucks<a class="headerlink" href="#trucks" title="Permalink to this headline">¶</a></h3>
-<p>Trucks can serve both shovels and dumpsites and, as a general rule, they are sent where it is more convenient.</p>
-<p>Assignment of trucks is performed according to the following rule:</p>
-<div class="math notranslate nohighlight">
-\[t^* = \arg\min_{t \in T} \left( travel\_time(t) + waiting\_time(t) \right)\]</div>
-<p>where <span class="math notranslate nohighlight">\(T\)</span> is the set of targets, which depends on the next task that a truck have to perform, and it can be any of shovels, dumpsites, or workshops. The chosen target <span class="math notranslate nohighlight">\(t^*\)</span> depends in turn on two functions, i.e. <span class="math notranslate nohighlight">\(travel\_time\)</span> and <span class="math notranslate nohighlight">\(waiting\_time\)</span> to the target <span class="math notranslate nohighlight">\(t\)</span>.</p>
-<div class="section" id="truck-features">
-<h4>Truck Features<a class="headerlink" href="#truck-features" title="Permalink to this headline">¶</a></h4>
-<p>A truck is characterized by the following list of features, which are stored in the corresponding properties of an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">Truck</span></code>.</p>
-<dl class="class">
-<dt>
-<em class="property">class </em><code class="sig-prename descclassname">Mine.</code><code class="sig-name descname">Truck</code><span class="sig-paren">(</span><em class="sig-param">alpha</em>, <em class="sig-param">beta</em>, <em class="sig-param">muCorrective</em>, <em class="sig-param">sigmaCorrective</em>, <em class="sig-param">muPreventive</em>, <em class="sig-param">sigmaPreventive</em>, <em class="sig-param">Cc</em>, <em class="sig-param">Cp</em>, <em class="sig-param">p</em>, <em class="sig-param">env</em>, <em class="sig-param">id</em>, <em class="sig-param">shovels</em>, <em class="sig-param">dumpsites</em>, <em class="sig-param">workshops</em>, <em class="sig-param">muCapacity</em>, <em class="sig-param">sigmaCapacity</em><span class="sig-paren">)</span></dt>
-<dd><p>The class replicates the operations and maintenance process of a Truck. The following parameters must be passed to initialize the object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>alpha</strong> (<em>float</em>) – Scale parameter of Weibull distribution</p></li>
-<li><p><strong>beta</strong> (<em>float</em>) – Shape parameter of Weibull distribution</p></li>
-<li><p><strong>muCorrective</strong> (<em>float</em>) – Mean time to repair</p></li>
-<li><p><strong>sigmaCorrective</strong> (<em>float</em>) – Time to repair std. dev.</p></li>
-<li><p><strong>muPreventive</strong> (<em>float</em>) – Mean maintenance time</p></li>
-<li><p><strong>sigmaPreventive</strong> (<em>float</em>) – Maintenance time std. dev.</p></li>
-<li><p><strong>Cc</strong> (<em>float</em>) – Cost of corrective maintenance</p></li>
-<li><p><strong>Cp</strong> (<em>float</em>) – Cost of preventive maintenance</p></li>
-<li><p><strong>p</strong> (<em>float</em>) – Probability threshold for preventive maintenance</p></li>
-<li><p><strong>env</strong> (<em>obj</em>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">simpy.Environment</span></code> object</p></li>
-<li><p><strong>id</strong> (<em>int</em>) – Identification number</p></li>
-<li><p><strong>shovels</strong> (<em>list</em>) – The list of shovels in the system</p></li>
-<li><p><strong>dumpsites</strong> (<em>list</em>) – The list of dump sites in the system</p></li>
-<li><p><strong>workshops</strong> (<em>list</em>) – The list of workshops in the system</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<p>Such features are partly specified in the external file <em>data/truck_data.csv</em> and partly are provided by the user.
-In particular, we are interested to adjust the parameter <strong>p</strong>, which determines the amount of preventive maintenance that is carried out on a truck.</p>
-<p>The workflow of a truck is described <a class="reference internal" href="workflows.html#truck-workflow"><span class="std std-ref">here</span></a>.</p>
-</div>
-</div>
-<div class="section" id="shovels">
-<h3>Shovels<a class="headerlink" href="#shovels" title="Permalink to this headline">¶</a></h3>
-<p>Shovels are located in specific sites in the mine</p>
-</div>
-<div class="section" id="dumpsites">
-<h3>DumpSites<a class="headerlink" href="#dumpsites" title="Permalink to this headline">¶</a></h3>
-<p>Dumpsites must be intended as sites where generic material is unloaded by trucks.
-There no dumpsites specifically designed for ore and waste, and the stockpile of a dumpsite is always increasing.</p>
-</div>
 </div>
 </div>
 
@@ -185,6 +141,7 @@ There no dumpsites specifically designed for ore and waste, and the stockpile of
 <li class="toctree-l2"><a class="reference internal" href="#matlab-interface">MatLab Interface</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="items_summary.html">Items Summary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
 </ul>
@@ -194,7 +151,7 @@ There no dumpsites specifically designed for ore and waste, and the stockpile of
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="introduction.html" title="previous chapter">Introduction</a></li>
-      <li>Next: <a href="workflows.html" title="next chapter">Workflows</a></li>
+      <li>Next: <a href="items_summary.html" title="next chapter">Items Summary</a></li>
   </ul></li>
 </ul>
 </div>
