@@ -27,7 +27,7 @@ def std(param):
     """
     # Create the simulation environment
     env = simpy.Environment()
-
+    env.statistics = dict()
     with open("data/workshops_data.csv","r",newline="\n") as f:
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
         workshopsData = [x for x in doc]
@@ -118,7 +118,7 @@ def test(SIM_TIME,seed):
     :rtype: dict
     """
     env = simpy.Environment()
-
+    env.statistics = dict()
     # WORKSHOPS DECLARATION
     with open("data/workshops_data.csv","r",newline="\n") as f:
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
@@ -227,6 +227,7 @@ def fitness(SIM_TIME,seed,thresholds):
     :rtype: dict
     """
     env = simpy.Environment()
+    env.statistics = dict()
     DEBUG = False
     # WORKSHOPS DECLARATION
     with open("data/workshops_data.csv","r",newline="\n") as f:
@@ -475,16 +476,125 @@ def mineMap(thresholds):
     plt.legend()
     plt.savefig("figures/mine_map.png")
 
+def truckSummary(history,SIM_TIME):
+    """
+    The function produces statistics from the history of a truck.
+
+    :param list history: the list of events that the truck was subject to
+    :return: a dictionary containing statistics, e.g. time spent in queue, availability, utilization
+    :rtype: dict
+
+    """
+    stat = dict(
+        time_in_queue = 0,
+        traveling_time = 0,
+        travel_due_to_CM = 0,
+        time_under_corrective_repair = 0,
+        time_under_preventive_repair = 0,
+        time_under_loading = 0,
+        time_under_unloading = 0,
+        availability = 0,
+        utilization = 0
+    )
+
+    val = list()
+    for i in range(len(history)-1):
+        if (history[i][2], history[i+1][2]) not in val:
+            val.append((history[i][2], history[i+1][2]))
+
+    for i in range(len(history)-1):
+        if history[i][2] == "arrived at":
+            if history[i+1][2] == "loading" or history[i+1][2] == "unloading" or history[i+1][2] == "PM" or history[i+1][2] == "failed":
+                assert (history[i][2], history[i+1][2]) in val
+                stat["time_in_queue"] += history[i+1][0] - history[i][0]
+            elif history[i+1][2] == "CM":
+                assert (history[i][2], history[i+1][2]) in val
+                stat["travel_due_to_CM"] += history[i+1][0] - history[i][0]
+            else:
+                raise ValueError
+
+        elif history[i][2] == "loading":
+            if history[i+1][2] == "failed" or history[i+1][2] == "loaded":
+                assert (history[i][2], history[i+1][2]) in val
+                stat["time_under_loading"] += history[i+1][0] - history[i][0]
+            else:
+                raise ValueError
+
+        elif history[i][2] == "unloading":
+            if history[i+1][2] == "failed" or history[i+1][2] == "unloaded":
+                assert (history[i][2], history[i+1][2]) in val
+                stat["time_under_unloading"] += history[i+1][0] - history[i][0]
+            else:
+                raise ValueError
+
+        elif history[i][2] == "loaded" or history[i][2] == "unloaded" or history[i][2] == "repaired":
+            if history[i+1][2] == "failed" or history[i+1][2] == "travel to":
+                assert (history[i][2], history[i+1][2]) in val
+                stat["time_under_loading"] += history[i+1][0] - history[i][0]
+            else:
+                raise ValueError
+
+        elif history[i][2] == "travel to":
+            if history[i+1][2] == "failed" or history[i+1][2] == "arrived at":
+                assert (history[i][2], history[i+1][2]) in val
+                stat["traveling_time"] += history[i+1][0] - history[i][0]
+            else:
+                raise ValueError
+
+        elif history[i][2] == "failed":
+            if history[i+1][2] == "travel to":
+                if history[i+2][2] == "arrived at":
+                    assert (history[i][2], history[i+1][2]) in val
+                    stat["traveling_time"] -= history[i+2][0] - history[i+1][0]
+                    stat["travel_due_to_CM"] += history[i+2][0] - history[i+1][0]
+                else:
+                    raise ValueError
+            else:
+                raise ValueError
+
+        elif history[i][2] == "PM":
+            if history[i+1][2] == "repaired":
+                assert (history[i][2], history[i+1][2]) in val
+                stat["time_under_preventive_repair"] += history[i+1][0] - history[i][0]
+            else:
+                raise ValueError
+        elif history[i][2] == "CM":
+            if history[i+1][2] == "repaired":
+                assert (history[i][2], history[i+1][2]) in val
+                stat["time_under_corrective_repair"] += history[i+1][0] - history[i][0]
+            else:
+                raise ValueError
+
+
+    stat["availability"] = (SIM_TIME - (stat['time_under_corrective_repair'] + stat['time_under_preventive_repair'] + stat['travel_due_to_CM'])) / SIM_TIME
+    stat["utilization"] = (SIM_TIME - (stat['time_under_corrective_repair'] + stat['time_under_preventive_repair'] + stat['time_in_queue'])) / SIM_TIME
+
+    print(stat["time_in_queue"] + stat["traveling_time"] + stat["time_under_corrective_repair"] + stat["time_under_preventive_repair"] + stat["time_under_loading"] + stat["time_under_unloading"] + stat['travel_due_to_CM'])
+
+    time = 0
+    for i in range(len(history)-1):
+        time += history[i+1][0] - history[i][0]
+    print(time, history[-1][0])
+    return stat
+
 if __name__ == "__main__":
     # best, score = GA(initialPopSize=100,items=12)
-    with open("results.json", "r") as f:
-        data = json.load(f)
+    # with open("results.json", "r") as f:
+    #     data = json.load(f)
 
-    thresholds = {
-        'Shovels': data['thresholds'][:2],
-        'Trucks': data['thresholds'][2:],
-    }
+    # thresholds = {
+    #     'Shovels': data['thresholds'][:2],
+    #     'Trucks': data['thresholds'][2:],
+    # }
 
     # fitness(1e5, 42, thresholds)
 
-    mineMap(thresholds=thresholds)
+    # mineMap(thresholds=thresholds)
+
+    stats = test(10000, 42)
+    # for i in stats['Truck5']['History']:
+    #     print(i)
+
+    stat = truckSummary(stats['Truck9']['History'], 10000)
+
+    print(stat)
