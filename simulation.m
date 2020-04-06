@@ -113,6 +113,7 @@ function output = sim(shovelPolicy,truckPolicy,SIM_TIME,SEED)
             temp.PreventiveInterventions = double(field.PreventiveInterventions);
             temp.PreventiveMaintenanceHistory = preventiveMaintenanceHistory;
             temp.History = cell2table(History);
+            temp.more_stats = struct(py.main.truckSummary(field.History));
 
             s = setfield(s,fNames{i},temp);
             
