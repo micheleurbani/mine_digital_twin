@@ -5,15 +5,15 @@ if exist('pe', 'var')
     localFolder = pwd;
     % Provide local python environment (important because required
     % libraries are installed there).
-    pe = pyenv('Version',strcat(localFolder,'/venv/Scripts/python.exe'));
+    pe = pyenv('Version',strcat(localFolder,'./venv/Scripts/python.exe'));
 end
 
 shovel = 0;
 truck = 0;
 % Specify policy
-shovelPolicy = shovel * ones(1,2);
-truckPolicy = truck * ones(1,2);
-SIM_TIME = 5600;
+shovelPolicy = [0.09489149715167379, 0.07855350468377378, 0.031012480624588046];
+truckPolicy = [0.06383568139931146, 0.06256905803502141, 0.007347536683141531, 0.058981953297324585, 0.07878249800333016, 0.05058120249898333, 0.013447304537421411, 0.03475903556714466, 0.08335430697158006];
+SIM_TIME = 10000;
 SEED = 42;
 
 % Run the simulation
@@ -70,7 +70,7 @@ function output = sim(shovelPolicy,truckPolicy,SIM_TIME,SEED)
     
     for i = 1:size(fNames,1)
         % Separate procedures for trucks and shovels, and dumpsites
-        if ~strcmp(fNames{i}(1:5),'DumpS')
+        if strcmp(fNames{i}(1:5),'Truck')
 
             field = struct(getfield(output,fNames{i}));
 
@@ -83,7 +83,52 @@ function output = sim(shovelPolicy,truckPolicy,SIM_TIME,SEED)
             else
                 failureHistory = zeros(1,3);
             end
+            
+            tempHistory = cell(field.History);
+            History = cell(size(tempHistory,1),1);
+            if min(size(tempHistory)) ~= 0
+                for j = 1:size(tempHistory,2)
+%                     History(j) = {[double(tempHistory{j}{1}), string(tempHistory{j}{2}), string(tempHistory{j}{3}), string(tempHistory{j}{4})]};
+                    History{j,1} = double(tempHistory{j}{1});
+                    History{j,2} = string(tempHistory{j}{2});
+                    History{j,3} = string(tempHistory{j}{3});
+                    History{j,4} = string(tempHistory{j}{4});
+                end
+            else
+                History = zeros(1,4);
+            end
+            
+            tempPreventiveMaintenanceHistory = cell(field.PreventiveMaintenanceHistory);
+            preventiveMaintenanceHistory = zeros(size(tempPreventiveMaintenanceHistory,1),3);
+            if min(size(tempPreventiveMaintenanceHistory)) ~= 0
+                for j = 1:size(tempPreventiveMaintenanceHistory,2)
+                    preventiveMaintenanceHistory(j,:) = cellfun(@double,cell(tempPreventiveMaintenanceHistory{j}));
+                end
+            else
+                preventiveMaintenanceHistory = zeros(1,3);
+            end
+            temp = struct();
+            temp.Failure = double(field.Failure);
+            temp.FailureHistory = failureHistory;
+            temp.PreventiveInterventions = double(field.PreventiveInterventions);
+            temp.PreventiveMaintenanceHistory = preventiveMaintenanceHistory;
+            temp.History = cell2table(History);
 
+            s = setfield(s,fNames{i},temp);
+            
+        elseif strcmp(fNames{i}(1:5), 'Shove')
+            field = struct(getfield(output,fNames{i}));
+
+            tempFailureHistory = cell(field.FailureHistory);
+            failureHistory = zeros(size(tempFailureHistory,1),3);
+            if min(size(tempFailureHistory)) ~= 0
+                for j = 1:size(tempFailureHistory,2)
+                    failureHistory(j,:) = cellfun(@double,cell(tempFailureHistory{j}));
+                end
+            else
+                failureHistory = zeros(1,3);
+            end
+            
             tempPreventiveMaintenanceHistory = cell(field.PreventiveMaintenanceHistory);
             preventiveMaintenanceHistory = zeros(size(tempPreventiveMaintenanceHistory,1),3);
             if min(size(tempPreventiveMaintenanceHistory)) ~= 0

@@ -1,10 +1,10 @@
 from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
-from statistics import mean
-import matplotlib.pyplot as plt
-from tqdm import tqdm
-from multiprocessing import Pool
+# from statistics import mean
+# import matplotlib.pyplot as plt
+# from tqdm import tqdm
+# from multiprocessing import Pool
 
 def std(param):
     """
@@ -564,22 +564,3 @@ def truckSummary(history):
     stat["utilization"] = (history[-1][0] - (stat['time_under_corrective_repair'] + stat['time_under_preventive_repair'] + stat['time_in_queue'])) / history[-1][0]
 
     return stat
-
-if __name__ == "__main__":
-    # best, score = GA(initialPopSize=100,items=12)
-    # with open("results.json", "r") as f:
-    #     data = json.load(f)
-
-    # thresholds = {
-    #     'Shovels': data['thresholds'][:2],
-    #     'Trucks': data['thresholds'][2:],
-    # }
-
-    # fitness(1e5, 42, thresholds)
-
-    # mineMap(thresholds=thresholds)
-
-    stats = test(1e5, 42)
-    # for i in stats['Truck5']['History']:
-    #     print(i)
-    stat = truckSummary(stats['Truck5']['History'])
