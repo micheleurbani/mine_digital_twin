@@ -96,7 +96,7 @@ class Truck(object):
                             # print("Truck%d \t start loading at Shovel%d\tat %.2f." %(self.id,shovel.id,self.env.now))
                         try:
                             start = self.env.now
-                            yield self.env.process(shovel.load())
+                            yield self.env.timeout(loadingTime)
                             if DEBUG:
                                 self.env.statistics["Truck%d"%self.id]["History"].append([self.env.now, self.__class__.__name__+"%d"%self.id, "loaded", shovel.__class__.__name__+"%d"%shovel.id])
                                 # print("Truck%d \t loaded by Shovel%d\t\tat %.2f." %(self.id,shovel.id,self.env.now))
