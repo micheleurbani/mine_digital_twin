@@ -1,7 +1,7 @@
 import simpy,random
 from math import exp, sqrt
 
-DEBUG = True
+DEBUG = False
 
 class Truck(object):
     """
@@ -79,12 +79,12 @@ class Truck(object):
                 shovel = self.assignment(shovels)
                 # TRAVEL
                 if DEBUG:
-                    print("Truck%d \t is traveling towards Shovel%d \tat %.2f." %(self.id,shovel.id,self.env.now))
-                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t is traveling towards Shovel%d \tat %.2f." %(self.id,shovel.id,self.env.now))
+                    print("Truck%d      is traveling towards Shovel%d   at %.2f." %(self.id,shovel.id,self.env.now))
+                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      is traveling towards Shovel%d   at %.2f." %(self.id,shovel.id,self.env.now))
                 yield self.env.process(self.travel(shovel.coordinates))
                 if DEBUG:
-                    print("Truck%d \t arrived at Shovel%d \t\tat %.2f." %(self.id,shovel.id,self.env.now))
-                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t arrived at Shovel%d \t\tat %.2f." %(self.id,shovel.id,self.env.now))
+                    print("Truck%d      arrived at Shovel%d         at %.2f." %(self.id,shovel.id,self.env.now))
+                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      arrived at Shovel%d             at %.2f." %(self.id,shovel.id,self.env.now))
 
                 # LOAD
                 loadingTime = shovel.servingTime()
@@ -93,20 +93,20 @@ class Truck(object):
                     with shovel.machine.request(priority=priority) as req:
                         yield req
                         if DEBUG:
-                            print("Truck%d \t start loading at Shovel%d\tat %.2f." %(self.id,shovel.id,self.env.now))
-                        self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t start loading at Shovel%d\tat %.2f." %(self.id,shovel.id,self.env.now))
+                            print("Truck%d      start loading at Shovel%d    at %.2f." %(self.id,shovel.id,self.env.now))
+                        self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      start loading at Shovel%d       at %.2f." %(self.id,shovel.id,self.env.now))
                         try:
                             start = self.env.now
                             yield self.env.timeout(loadingTime)
                             if DEBUG:
-                                print("Truck%d \t loaded by Shovel%d\t\tat %.2f." %(self.id,shovel.id,self.env.now))
-                            self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t loaded by Shovel%d\t\tat %.2f." %(self.id,shovel.id,self.env.now))
+                                print("Truck%d      loaded by Shovel%d        at %.2f." %(self.id,shovel.id,self.env.now))
+                            self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      loaded by Shovel%d              at %.2f." %(self.id,shovel.id,self.env.now))
                             loadingTime = 0
                         except simpy.Interrupt as interruption:
                             if type(interruption.cause) is simpy.resources.resource.Preempted:
                                 if DEBUG:
-                                    print("Truck%d\t interrupted loading at Shovel%d\tat %.2f." %(self.id,shovel.id,self.env.now))
-                                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d\t interrupted loading at Shovel%d\tat %.2f." %(self.id,shovel.id,self.env.now))
+                                    print("Truck%d     interrupted loading at Shovel%d    at %.2f." %(self.id,shovel.id,self.env.now))
+                                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      interrupted loading at Shovel%d at %.2f." %(self.id,shovel.id,self.env.now))
                                 loadingTime -= self.env.now - start
                                 priority = 2
                             elif interruption.cause[0] == 2:
@@ -127,23 +127,23 @@ class Truck(object):
 
                 # TRAVEL
                 if DEBUG:
-                    print("Truck%d \t is traveling towards DumpSite%d at %.2f." %(self.id,dumpsite.id,self.env.now))
-                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t is traveling towards DumpSite%d at %.2f." %(self.id,dumpsite.id,self.env.now))
+                    print("Truck%d      is traveling towards DumpSite%d at %.2f." %(self.id,dumpsite.id,self.env.now))
+                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      is traveling towards DumpSite%d at %.2f." %(self.id,dumpsite.id,self.env.now))
                 yield self.env.process(self.travel(dumpsite.coordinates))
                 if DEBUG:
-                    print("Truck%d \t arrived at DumpSite%d \t\tat %.2f." %(self.id,dumpsite.id,self.env.now))
-                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t arrived at DumpSite%d \t\tat %.2f." %(self.id,dumpsite.id,self.env.now))
+                    print("Truck%d      arrived at DumpSite%d         at %.2f." %(self.id,dumpsite.id,self.env.now))
+                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      arrived at DumpSite%d           at %.2f." %(self.id,dumpsite.id,self.env.now))
 
                 # UNLOAD
                 with dumpsite.machine.request() as req:
                     yield req
                     if DEBUG:
-                        print("Truck%d \t under unloading at DumpSite%d\tat %.2f." %(self.id,dumpsite.id,self.env.now))
-                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t under unloading at DumpSite%d\tat %.2f." %(self.id,dumpsite.id,self.env.now))
+                        print("Truck%d      under unloading at DumpSite%d    at %.2f." %(self.id,dumpsite.id,self.env.now))
+                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      under unloading at DumpSite%d   at %.2f." %(self.id,dumpsite.id,self.env.now))
                     yield self.env.process(dumpsite.unload(self,amount=self.capacity))
                     if DEBUG:
-                        print("Truck%d \t unloaded at DumpSite%d\t\tat %.2f." %(self.id,dumpsite.id,self.env.now))
-                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t unloaded at DumpSite%d\t\tat %.2f." %(self.id,dumpsite.id,self.env.now))
+                        print("Truck%d      unloaded at DumpSite%d        at %.2f." %(self.id,dumpsite.id,self.env.now))
+                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      unloaded at DumpSite%d          at %.2f." %(self.id,dumpsite.id,self.env.now))
 
                 # PREVENTIVE MAINTENANCE
                 shovel = self.assignment(shovels)
@@ -157,50 +157,50 @@ class Truck(object):
                     self.failure.interrupt(cause="PM%d" % self.id)
                     # TRAVEL
                     if DEBUG:
-                        print("Truck%d \t is traveling to Workshop%d \tat %.2f." %(self.id,workshop.id,self.env.now))
-                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t is traveling to Workshop%d \tat %.2f." %(self.id,workshop.id,self.env.now))
+                        print("Truck%d      is traveling to Workshop%d     at %.2f." %(self.id,workshop.id,self.env.now))
+                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      is traveling to Workshop%d     at %.2f." %(self.id,workshop.id,self.env.now))
                     yield self.env.process(self.travel(workshop.coordinates))
                     if DEBUG:
-                        print("Truck%d \t arrived at WorkShop%d \t\tat %.2f." %(self.id,workshop.id,self.env.now))
-                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t arrived at WorkShop%d \t\tat %.2f." %(self.id,workshop.id,self.env.now))
+                        print("Truck%d      arrived at WorkShop%d         at %.2f." %(self.id,workshop.id,self.env.now))
+                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      arrived at WorkShop%d         at %.2f." %(self.id,workshop.id,self.env.now))
                     # REPAIR
                     with workshop.machine.request(priority=2) as req:
                         yield req
                         if DEBUG:
-                            print("Truck%d \t under repair at Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
-                        self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t under repair at Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
+                            print("Truck%d      under repair at Workshop%d    at %.2f." %(self.id,workshop.id,self.env.now))
+                        self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      under repair at Workshop%d    at %.2f." %(self.id,workshop.id,self.env.now))
                         yield self.env.process(workshop.preventiveMaintenance(self))
                         if DEBUG:
-                            print("Truck%d \t repaired by Workshop%d \t\tat %.2f." %(self.id,workshop.id,self.env.now))
-                        self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t repaired by Workshop%d \t\tat %.2f." %(self.id,workshop.id,self.env.now))
+                            print("Truck%d      repaired by Workshop%d         at %.2f." %(self.id,workshop.id,self.env.now))
+                        self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      repaired by Workshop%d         at %.2f." %(self.id,workshop.id,self.env.now))
                     # REGENERATE THE FAULT EVENT
                     self.failure = self.env.process(self.fault())
 
             except simpy.Interrupt:
                 if DEBUG:
-                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t failed \t\t\tat %.2f." % (self.id, self.env.now))
+                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      failed             at %.2f." % (self.id, self.env.now))
                 self.env.statistics["Truck%d" %self.id]["Failure"] += 1
                 self.env.statistics["Truck%d" %self.id]["FailureHistory"].append([self.env.now, self.id, self.Cc])
                 # ASSIGN A WORKSHOP
                 workshop = self.assignment(workshops)
                 # TRAVEL
                 if DEBUG:
-                    print("Truck%d \t is traveling to Workshop%d \tat %.2f." %(self.id,workshop.id,self.env.now))
-                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t is traveling to Workshop%d \tat %.2f." %(self.id,workshop.id,self.env.now))
+                    print("Truck%d      is traveling to Workshop%d     at %.2f." %(self.id,workshop.id,self.env.now))
+                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      is traveling to Workshop%d      at %.2f." %(self.id,workshop.id,self.env.now))
                 yield self.env.process(self.travel(workshop.coordinates))
                 if DEBUG:
-                    print("Truck%d \t arrived at WorkShop%d \t\tat %.2f." %(self.id,workshop.id,self.env.now))
-                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t arrived at WorkShop%d \t\tat %.2f." %(self.id,workshop.id,self.env.now))
+                    print("Truck%d      arrived at WorkShop%d         at %.2f." %(self.id,workshop.id,self.env.now))
+                self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      arrived at WorkShop%d           at %.2f." %(self.id,workshop.id,self.env.now))
                 # REPAIR
                 with workshop.machine.request(priority=2) as req:
                     yield req
                     if DEBUG:
-                        print("Truck%d \t under repair at Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
-                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t under repair at Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
+                        print("Truck%d      under repair at Workshop%d    at %.2f." %(self.id,workshop.id,self.env.now))
+                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      under repair at Workshop%d      at %.2f." %(self.id,workshop.id,self.env.now))
                     yield self.env.process(workshop.correctiveRepair(self))
                     if DEBUG:
-                        print("Truck%d \t repaired by Workshop%d \t\tat %.2f." %(self.id,workshop.id,self.env.now))
-                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d \t repaired by Workshop%d \t\tat %.2f." %(self.id,workshop.id,self.env.now))
+                        print("Truck%d      repaired by Workshop%d         at %.2f." %(self.id,workshop.id,self.env.now))
+                    self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      repaired by Workshop%d          at %.2f." %(self.id,workshop.id,self.env.now))
                 # REGENERATE THE FAULT EVENT
                 self.failure = self.env.process(self.fault())
 
@@ -232,7 +232,7 @@ class Truck(object):
 
         .. math::
 
-            \\text{argmin}_{i \\in I} = \\mathbb{E} [ \\text{travel distance to $i$} ] + \\mathbb{E} [ \\text{waiting time at $i$} ]
+            \    ext{argmin}_{i \\in I} = \\mathbb{E} [ \    ext{travel distance to $i$} ] + \\mathbb{E} [ \    ext{waiting time at $i$} ]
 
         """
         x, candidate = 1e6, None
@@ -254,7 +254,7 @@ class Truck(object):
 
         .. math::
 
-            P(t < T < \\Delta t | T > t) > \\text{threshold}
+            P(t < T < \\Delta t | T > t) > \    ext{threshold}
 
         """
         def weibull(x):
@@ -399,8 +399,8 @@ class Shovel(Server):
                     with self.machine.request(priority=1) as req:
                         self.broken = True
                         if DEBUG:
-                            print("Shovel%d\t failed\t\t\t\tat %.2f." % (self.id, self.env.now))
-                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t failed\t\t\t\tat %.2f." % (self.id, self.env.now))
+                            print("Shovel%d     failed                at %.2f." % (self.id, self.env.now))
+                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     failed                         at %.2f." % (self.id, self.env.now))
                         self.env.statistics["Shovel%d" %self.id]["Failure"] += 1
                         self.env.statistics["Shovel%d" %self.id]["FailureHistory"].append([self.env.now, self.id, self.Cc])
                         yield req
@@ -408,31 +408,31 @@ class Shovel(Server):
                         workshop = self.assignment(self.workshops)
                         # TRAVEL
                         if DEBUG:
-                            print("Shovel%d\t is traveling towards Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
-                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t is traveling towards Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
+                            print("Shovel%d     is traveling towards Workshop%d at %.2f." %(self.id,workshop.id,self.env.now))
+                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     is traveling towards Workshop%d at %.2f." %(self.id,workshop.id,self.env.now))
                         yield self.env.process(self.travel(workshop.coordinates))
                         if DEBUG:
-                            print("Shovel%d\t arrived at Workshop%d\t\tat %.2f." %(self.id,workshop.id,self.env.now))
-                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t arrived at Workshop%d\t\tat %.2f." %(self.id,workshop.id,self.env.now))
+                            print("Shovel%d     arrived at Workshop%d        at %.2f." %(self.id,workshop.id,self.env.now))
+                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     arrived at Workshop%d           at %.2f." %(self.id,workshop.id,self.env.now))
                         # REPAIR
                         with workshop.machine.request(priority=1) as req:
                             yield req
                             if DEBUG:
-                                print("Shovel%d\t is under repair at Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
-                            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t is under repair at Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
+                                print("Shovel%d     is under repair at Workshop%d    at %.2f." %(self.id,workshop.id,self.env.now))
+                            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     is under repair at Workshop%d   at %.2f." %(self.id,workshop.id,self.env.now))
                             self.lastMaintenance = self.env.now
                             yield self.env.timeout(self.timeToRepairCorrective())
                             if DEBUG:
-                                print("Shovel%d\t repaired at Workshop%d\t\tat %.2f." %(self.id,workshop.id,self.env.now))
-                            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t repaired at Workshop%d\t\tat %.2f." %(self.id,workshop.id,self.env.now))
+                                print("Shovel%d     repaired at Workshop%d        at %.2f." %(self.id,workshop.id,self.env.now))
+                            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     repaired at Workshop%d          at %.2f." %(self.id,workshop.id,self.env.now))
                         # TRAVEL
                         if DEBUG:
-                            print("Shovel%d\t is traveling towards its site\tat %.2f." %(self.id,self.env.now))
-                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t is traveling towards its site\tat %.2f." %(self.id,self.env.now))
+                            print("Shovel%d     is traveling towards its site    at %.2f." %(self.id,self.env.now))
+                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     is traveling towards its site  at %.2f." %(self.id,self.env.now))
                         yield self.env.process(self.travel(workshop.coordinates))
                         if DEBUG:
-                            print("Shovel%d\t arrived at its site\t\tat %.2f." %(self.id,self.env.now))
-                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t arrived at its site\t\tat %.2f." %(self.id,self.env.now))
+                            print("Shovel%d     arrived at its site        at %.2f." %(self.id,self.env.now))
+                        self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     arrived at its site            at %.2f." %(self.id,self.env.now))
                         self.broken = False
             except simpy.Interrupt:
                 break
@@ -443,7 +443,7 @@ class Shovel(Server):
 
         .. math::
 
-            P(t < T < \\Delta t | T > t) > \\text{threshold}
+            P(t < T < \\Delta t | T > t) > \    ext{threshold}
 
         """
         def weibull(x):
@@ -461,37 +461,37 @@ class Shovel(Server):
         DEBUG = False
         with self.machine.request(priority=1) as req:
             if DEBUG:
-                print("Shovel%d\t failed\t\t\t\tat %.2f." % (self.id, self.env.now))
+                print("Shovel%d     failed                at %.2f." % (self.id, self.env.now))
             self.env.statistics["Shovel%d" %self.id]["PreventiveInterventions"] += 1
             self.env.statistics["Shovel%d" %self.id]["PreventiveMaintenanceHistory"].append([self.env.now, self.id, self.Cp])
             yield req
             # TRAVEL
             if DEBUG:
-                print("Shovel%d\t is traveling towards Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
-            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t arrived at its site\t\tat %.2f." %(self.id,self.env.now))
+                print("Shovel%d     is traveling towards Workshop%d    at %.2f." %(self.id,workshop.id,self.env.now))
+            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     is traveling towards Workshop%d at %.2f." %(self.id,workshop.id,self.env.now))
             yield self.env.process(self.travel(workshop.coordinates))
             if DEBUG:
-                print("Shovel%d\t arrived at Workshop%d\t\tat %.2f." %(self.id,workshop.id,self.env.now))
-            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t arrived at Workshop%d\t\tat %.2f." %(self.id,workshop.id,self.env.now))
+                print("Shovel%d     arrived at Workshop%d        at %.2f." %(self.id,workshop.id,self.env.now))
+            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     arrived at Workshop%d           at %.2f." %(self.id,workshop.id,self.env.now))
             # REPAIR
             with workshop.machine.request(priority=1) as req:
                 yield req
                 if DEBUG:
-                    print("Shovel%d\t is under repair at Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
-                self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t is under repair at Workshop%d\tat %.2f." %(self.id,workshop.id,self.env.now))
+                    print("Shovel%d     is under repair at Workshop%d    at %.2f." %(self.id,workshop.id,self.env.now))
+                self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     is under repair at Workshop%d   at %.2f." %(self.id,workshop.id,self.env.now))
                 self.lastMaintenance = self.env.now
                 yield self.env.timeout(self.timeToRepairCorrective())
                 if DEBUG:
-                    print("Shovel%d\t repaired at Workshop%d\t\tat %.2f." %(self.id,workshop.id,self.env.now))
-                self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t repaired at Workshop%d\t\tat %.2f." %(self.id,workshop.id,self.env.now))
+                    print("Shovel%d     repaired at Workshop%d        at %.2f." %(self.id,workshop.id,self.env.now))
+                self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     repaired at Workshop%d          at %.2f." %(self.id,workshop.id,self.env.now))
             # TRAVEL
             if DEBUG:
-                print("Shovel%d\t is traveling towards its site\tat %.2f." %(self.id,self.env.now))
-                self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t is traveling towards its site\tat %.2f." %(self.id,self.env.now))
+                print("Shovel%d     is traveling towards its site    at %.2f." %(self.id,self.env.now))
+            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     is traveling towards its site  at %.2f." %(self.id,self.env.now))
             yield self.env.process(self.travel(workshop.coordinates))
             if DEBUG:
-                print("Shovel%d\t arrived at its site\t\tat %.2f." %(self.id,self.env.now))
-                self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d\t arrived at its site\t\tat %.2f." %(self.id,self.env.now))
+                print("Shovel%d     arrived at its site        at %.2f." %(self.id,self.env.now))
+            self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     arrived at its site            at %.2f." %(self.id,self.env.now))
         self.failure = self.env.process(self.fault())
 
 

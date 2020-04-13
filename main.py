@@ -107,7 +107,8 @@ def std(param):
     for i in range(len(shovels)):
         print("Shovel%d:\tFailures =" %i, env.statistics["Shovel%d" %i]["Failure"], "\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
 
-    return json.dumps(env.statistics)
+    # return json.dumps(env.statistics)
+    return env.statistics
 
 def test(SIM_TIME,seed):
     """The function run a single instance of the simulation experiment.
@@ -579,3 +580,5 @@ if __name__ == "__main__":
         param = json.load(f)
 
     stats = std(param)
+    for i in stats['Shovel1']['History']:
+        print(i)
