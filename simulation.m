@@ -8,13 +8,22 @@ if exist('pe', 'var')
     pe = pyenv('Version',strcat(localFolder,'./venv/Scripts/python.exe'));
 end
 
-shovel = 0;
-truck = 0;
 % Specify policy
 shovelPolicy = [0.09489149715167379, 0.07855350468377378, 0.031012480624588046];
 truckPolicy = [0.06383568139931146, 0.06256905803502141, 0.007347536683141531, 0.058981953297324585, 0.07878249800333016, 0.05058120249898333, 0.013447304537421411, 0.03475903556714466, 0.08335430697158006];
 SIM_TIME = 10000;
 SEED = 42;
+
+param = struct();
+param.shovelPolicy = shovelPolicy;
+param.truckPolicy = truckPolicy;
+param.simTime = SIM_TIME;
+param.seed = SEED;
+json_format = jsonencode(param);
+fid = fopen('param.json', 'w');
+if fid == -1, error('Cannot create JSON file'); end
+fwrite(fid, json_format, 'char');
+fclose(fid);
 
 % Run the simulation
 output = sim(shovelPolicy,truckPolicy,SIM_TIME,SEED);

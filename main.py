@@ -1,7 +1,7 @@
 from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
-# from statistics import mean
+from statistics import mean
 # import matplotlib.pyplot as plt
 # from tqdm import tqdm
 # from multiprocessing import Pool
@@ -14,26 +14,35 @@ def std(param):
     -  nShovels:       the number of shovels simulated
     -  nDumpSites:     the number of dumpsites simulated
     -  nWorkShops:     the number of workshops simulated
+    -  shovelPolicy:   a list containing the thresholds for maintenance of shovels
+    -  truckPolicy:    a list containing the thresholds for maintenance of trucks
     -  thresholdsPM:   a dictionary with PM thresholds for trucks and shovels
-    -  SIM_TIME:       the simulation time in minutes
-    -  SEED:           a value for the seed (not relevant if replication of results is not required)
+    -  simTime:       the simulation time in minutes
+    -  seed:           a value for the seed (not relevant if replication of results is not required)
 
     The function returns the following statistics (in a dictionary):
-    - Number of maintenance interventions per each truck adn shovel, subdivided in:
+    - Number of maintenance interventions per each truck and shovel, subdivided in:
         -- preventive interventions
         -- corrective interventions
-    - stockpiles levels as a function of time
+    - Maintenance history of trucks and shovels
+    - More statistics on usage of trucks and shovels
+    - Stockpiles levels as a function of time
 
     """
+
+    assert len(param['shovelPolicy']) == param['nShovels']
+    assert len(param['truckPolicy']) == param['nTrucks']
+
     # Create the simulation environment
     env = simpy.Environment()
     env.statistics = dict()
+
     with open("data/workshops_data.csv","r",newline="\n") as f:
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
         workshopsData = [x for x in doc]
     workshops = [
         WorkShop(env,i,(workshopsData[i][0],workshopsData[i][1]))
-        for i in range(param['nWorkShops'])]
+        for i in range(int(param['nWorkShops']))]
 
     with open("data/shovels_data.csv","r",newline="\n") as f:
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
@@ -53,17 +62,16 @@ def std(param):
             beta=shovelsData[i][9],
             Cc=shovelsData[i][10],
             Cp=shovelsData[i][11],
-            p=param['thresholdsPM']['shovels'][i],
+            p=param['shovelPolicy'][i],
             workshops=workshops)
-        for i in range(param['nShovels'])]
+        for i in range(int(param['nShovels']))]
 
     with open("data/dumpsites_data.csv","r",newline="\n") as f:
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
         dumpsiteData = [x for x in doc]
     dumpsites = [
         DumpSite(env,i,coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),mu=dumpsiteData[i][0],sigma=dumpsiteData[i][1])
-        for i in range(param['nDumpSites'])
-    ]
+        for i in range(int(param['nDumpSites']))]
 
     with open("data/truck_data.csv","r",newline="\n") as f:
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
@@ -78,18 +86,19 @@ def std(param):
         sigmaPreventive=truckData[i][5],
         Cc=truckData[i][2],
         Cp=truckData[i][3],
-        p=param["thresholdsPM"]["trucks"][i],
+        p=param['truckPolicy'][i],
         env=env,
         id=i,
         shovels=shovels,
         dumpsites=dumpsites,
         workshops=workshops,
         muCapacity=truckData[i][8],
-        sigmaCapacity=truckData[i][9]) for i in range(param["nTrucks"])]
+        sigmaCapacity=truckData[i][9])
+        for i in range(int(param["nTrucks"]))]
 
-    random.seed(param["SEED"])
+    random.seed(param["seed"])
     begin = datetime.now()
-    env.run(until=param["SIM_TIME"])
+    env.run(until=param["simTime"])
     print('End')
     processingTime = datetime.now() - begin
     print("Processing time ", processingTime)
@@ -98,7 +107,7 @@ def std(param):
     for i in range(len(shovels)):
         print("Shovel%d:\tFailures =" %i, env.statistics["Shovel%d" %i]["Failure"], "\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
 
-    return env.statistics
+    return json.dumps(env.statistics)
 
 def test(SIM_TIME,seed):
     """The function run a single instance of the simulation experiment.
@@ -564,3 +573,9 @@ def truckSummary(history):
     stat["utilization"] = (history[-1][0] - (stat['time_under_corrective_repair'] + stat['time_under_preventive_repair'] + stat['time_in_queue'])) / history[-1][0]
 
     return stat
+
+if __name__ == "__main__":
+    with open('param.json', 'r') as f:
+        param = json.load(f)
+
+    stats = std(param)
