@@ -38,81 +38,127 @@
 <div class="section" id="python-setup">
 <h2>Python Setup<a class="headerlink" href="#python-setup" title="Permalink to this headline">¶</a></h2>
 <p>As far as I tested, no installation of Python on the user OS should be necessary. A Python virtualenvironment is already present in the local folder <cite>venv</cite> with all the packages required to run the simulation.</p>
-<p>The MatLab script calls the local virtualenvironment autonomously.</p>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">clear</span><span class="p">;</span> <span class="n">close</span> <span class="s">all</span><span class="p">;</span> <span class="n">clc</span>
-</pre></div>
 </div>
-<p>If a Python environment has not been specified, provide indications.:</p>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">exist</span><span class="p">(</span><span class="s">&#39;pe&#39;</span><span class="p">,</span> <span class="s">&#39;var&#39;</span><span class="p">)</span>
+<div class="section" id="matlab-interface">
+<h2>MatLab Interface<a class="headerlink" href="#matlab-interface" title="Permalink to this headline">¶</a></h2>
+<p>The integration between MatLab and Python was subject to major updates starting from MatLab 2019a, therefore it is warmly suggested to use MatLab 2019a or later.
+The first thing to do when we want to call Python scripts from MatLab is to clear the workspace from old variables and to specify the virtual environment we want to work with.
+It is possible to specify the Python interpreter only once per MatLab session, i.e. when you run your script a second time MatLab will raise an error unless you comment the function <em>pyenv()</em> or, better, you use the following snippet, which automatically detects the presence of a Python interpreter.
+Due to this hallmark of MatLab, whenever you modify a Python script that you want to use in MatLab, it is required to restart MatLab.</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">clear</span><span class="p">;</span> <span class="n">close</span> <span class="s">all</span><span class="p">;</span> <span class="n">clc</span><span class="p">;</span>
+
+<span class="n">if</span> <span class="s">exist(&quot;pe&quot;,</span> <span class="s">&quot;var&quot;)</span>
     <span class="c">% Retrieve the path of the local folder</span>
     <span class="n">localFolder</span> <span class="p">=</span> <span class="n">pwd</span><span class="p">;</span>
     <span class="c">% Provide local python environment (important because required</span>
     <span class="c">% libraries are installed there).</span>
-    <span class="n">pe</span> <span class="p">=</span> <span class="n">pyenv</span><span class="p">(</span><span class="s">&#39;Version&#39;</span><span class="p">,</span><span class="n">strcat</span><span class="p">(</span><span class="n">localFolder</span><span class="p">,</span><span class="s">&#39;/venv/Scripts/python.exe&#39;</span><span class="p">));</span>
+    <span class="n">pe</span> <span class="p">=</span> <span class="n">pyenv</span><span class="p">(</span><span class="s">&quot;Version&quot;</span><span class="p">,</span><span class="n">strcat</span><span class="p">(</span><span class="n">localFolder</span><span class="p">,</span><span class="s">&quot;/venv/Scripts/python.exe&quot;</span><span class="p">));</span>
 <span class="n">end</span>
 </pre></div>
 </div>
-<p>The thresholds for decisions about preventive maintenance are provided as arrays.:</p>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">shovelPolicy</span> <span class="p">=</span> <span class="p">[</span><span class="mf">0.004</span><span class="p">,</span> <span class="mf">0.008</span><span class="p">,</span> <span class="mf">0.006</span><span class="p">];</span>
-<span class="n">truckPolicy</span> <span class="p">=</span> <span class="p">[</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.05</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.05</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mf">0.03</span><span class="p">];</span>
-<span class="n">SIM_TIME</span> <span class="p">=</span> <span class="mi">5600</span><span class="p">;</span>
-<span class="n">SEED</span> <span class="p">=</span> <span class="mi">42</span><span class="p">;</span>
+<div class="section" id="declaration-of-simulation-parameters">
+<h3>Declaration of Simulation Parameters<a class="headerlink" href="#declaration-of-simulation-parameters" title="Permalink to this headline">¶</a></h3>
+<p>Simulation paramters are specified using a MatLab <em>struct</em> data type.
+It is possible to specify the following parameters:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 12%" />
+<col style="width: 73%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Data Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>shovelPolicy</p></td>
+<td><p>Array</p></td>
+<td><p>It contains threshold values for maintenance of shovels.</p></td>
+</tr>
+<tr class="row-odd"><td><p>truckPolicy</p></td>
+<td><p>Array</p></td>
+<td><p>It contains threshold values for maintenance of trucks.</p></td>
+</tr>
+<tr class="row-even"><td><p>nShovels</p></td>
+<td><p>int</p></td>
+<td><p>The number of in the mine.</p></td>
+</tr>
+<tr class="row-odd"><td><p>nTrucks</p></td>
+<td><p>int</p></td>
+<td><p>The number of in the mine.</p></td>
+</tr>
+<tr class="row-even"><td><p>nDumpSites</p></td>
+<td><p>int</p></td>
+<td><p>The number of in the mine.</p></td>
+</tr>
+<tr class="row-odd"><td><p>nWorkShops</p></td>
+<td><p>int</p></td>
+<td><p>The number of in the mine.</p></td>
+</tr>
+<tr class="row-even"><td><p>simTime</p></td>
+<td><p>int</p></td>
+<td><p>The length of the simulation horizon [minutes].</p></td>
+</tr>
+<tr class="row-odd"><td><p>seed</p></td>
+<td><p>int</p></td>
+<td><p>An arbitrary value to allow replication of the experiment</p></td>
+</tr>
+</tbody>
+</table>
+<p>An example of parameter declaration if the following.</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Create a struct variable where to store simulation parameters</span>
+<span class="n">param</span> <span class="p">=</span> <span class="n">struct</span><span class="p">();</span>
+<span class="c">% Declare shovel policy</span>
+<span class="n">param</span><span class="p">.</span><span class="n">shovelPolicy</span> <span class="p">=</span> <span class="p">[</span><span class="mf">0.09</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">];</span>
+<span class="c">% Declare truck policy</span>
+<span class="n">param</span><span class="p">.</span><span class="n">truckPolicy</span> <span class="p">=</span> <span class="p">[</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span><span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">];</span>
 
-<span class="c">% Call the function `sim` to run the simulation.</span>
-<span class="n">output</span> <span class="p">=</span> <span class="n">sim</span><span class="p">(</span><span class="n">shovelPolicy</span><span class="p">,</span><span class="n">truckPolicy</span><span class="p">,</span><span class="n">SIM_TIME</span><span class="p">,</span><span class="n">SEED</span><span class="p">);</span>
+<span class="c">% Specify how many items are present in the mine</span>
+<span class="n">param</span><span class="p">.</span><span class="n">nShovels</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">shovelPolicy</span><span class="p">);</span>
+<span class="n">param</span><span class="p">.</span><span class="n">nTrucks</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">truckPolicy</span><span class="p">);</span>
+<span class="n">param</span><span class="p">.</span><span class="n">nDumpSites</span> <span class="p">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="n">param</span><span class="p">.</span><span class="n">nWorkShops</span> <span class="p">=</span> <span class="mi">2</span><span class="p">;</span>
+
+<span class="n">param</span><span class="p">.</span><span class="n">simTime</span> <span class="p">=</span> <span class="mi">100000</span><span class="p">;</span>     <span class="c">% Length of thesimulation [minutes]</span>
+<span class="n">param</span><span class="p">.</span><span class="n">seed</span> <span class="p">=</span> <span class="mi">42</span><span class="p">;</span>            <span class="c">% A value for the seed</span>
 </pre></div>
 </div>
-<dl class="function">
-<dt id="sim">
-<code class="sig-name descname">sim</code><span class="sig-paren">(</span><em class="sig-param">shovelPolicy</em>, <em class="sig-param">truckPolicy</em>, <em class="sig-param">SIM_TIME</em>, <em class="sig-param">SEED</em><span class="sig-paren">)</span><a class="headerlink" href="#sim" title="Permalink to this definition">¶</a></dt>
-<dd><p>SIM function call a MatLab interpreter and execute a single simulation experiment using the parameters provided below. Function variables include:</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>shovelPolicy</strong> (<em>array</em>) – an array with length from 1 to 4 where the thresholds to trigger preventive maintenance are stored.</p></li>
-<li><p><strong>truckPolicy</strong> (<em>array</em>) – an array with length from 1 to 30 where the thresholds to trigger preventive maintenance are stored.</p></li>
-<li><p><strong>SIM_TIME</strong> (<em>int</em>) – the length of the simulation horizon.</p></li>
-<li><p><strong>SEED</strong> (<em>int</em>) – a value provided for reproducibility of the simulation instance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a variable of the type <em>struct</em> containing the results of the simulation</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>struct</p>
-</dd>
-</dl>
-</dd></dl>
+</div>
+<div class="section" id="run-a-simulation-experiment">
+<h3>Run a Simulation Experiment<a class="headerlink" href="#run-a-simulation-experiment" title="Permalink to this headline">¶</a></h3>
+<p>Before to run a simulation we need to convert the variable <em>param</em> to JSON format.
+This step allows to simplify the communication between MatLab and Python, which othrewise would require to convert MatLab data types to Python data types.
+Since the values that are passed to the Python interpreter are not objects, they can be easily read by Python.</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Encode the struct using JSON format</span>
+<span class="n">json_format</span> <span class="p">=</span> <span class="n">jsonencode</span><span class="p">(</span><span class="n">param</span><span class="p">);</span>
 
-<p>More parameters about the simulation experiment are provided to the Python interpreter by means of dictionary. Those parameters are the number of dumpsites and the number of workshops.
-Parameters which define the behaviour of trucks, shovels, dumpsites, and workshops are defined in the relative files within the folder “data”.</p>
-<p>The function returns a strucs with the number of corrective and preventive interventions, and the stockpiles level histories.:</p>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span>output <span class="p">=</span><span class="w"> </span><span class="nf">sim</span><span class="p">(</span>shovelPolicy,truckPolicy,SIM_TIME,SEED<span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="c">% Specify parameters</span>
-    <span class="n">param</span> <span class="p">=</span> <span class="n">py</span><span class="p">.</span><span class="n">dict</span><span class="p">(</span><span class="c">...</span>
-        <span class="n">pyargs</span><span class="p">(</span><span class="c">...</span>
-        <span class="s">&#39;nTrucks&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="nb">length</span><span class="p">(</span><span class="n">truckPolicy</span><span class="p">)),</span> <span class="c">...      % Between 1 and 30</span>
-        <span class="s">&#39;nShovels&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="nb">length</span><span class="p">(</span><span class="n">shovelPolicy</span><span class="p">)),</span> <span class="c">...    % Between 1 and 4</span>
-        <span class="s">&#39;nDumpSites&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="c">...                     % Between 1 and 5</span>
-        <span class="s">&#39;nWorkShops&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="c">...                     % Between 1 and 3</span>
-        <span class="s">&#39;SIM_TIME&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="n">SIM_TIME</span><span class="p">),</span> <span class="c">...                % One year expressed in minutes</span>
-        <span class="s">&#39;SEED&#39;</span><span class="p">,</span> <span class="n">int32</span><span class="p">(</span><span class="n">SEED</span><span class="p">),</span> <span class="c">...</span>
-        <span class="s">&#39;thresholdsPM&#39;</span><span class="p">,</span> <span class="n">py</span><span class="p">.</span><span class="n">dict</span><span class="p">(</span><span class="c">...</span>
-            <span class="n">pyargs</span><span class="p">(</span><span class="c">...</span>
-                <span class="s">&#39;shovels&#39;</span><span class="p">,</span> <span class="n">py</span><span class="p">.</span><span class="n">list</span><span class="p">(</span><span class="n">shovelPolicy</span><span class="p">),</span> <span class="c">...</span>
-                <span class="s">&#39;trucks&#39;</span><span class="p">,</span> <span class="n">py</span><span class="p">.</span><span class="n">list</span><span class="p">(</span><span class="n">truckPolicy</span><span class="p">)</span> <span class="c">...</span>
-            <span class="p">)</span><span class="c">...</span>
-        <span class="p">)</span><span class="c">...</span>
-    <span class="p">));</span>
+<span class="c">% Unconmment the following code in case you need to save the parameters in</span>
+<span class="c">% JSON format to an external file</span>
+<span class="n">fid</span> <span class="p">=</span> <span class="n">fopen</span><span class="p">(</span><span class="s">&quot;param.json&quot;</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">);</span>
 
-    <span class="n">output</span> <span class="p">=</span> <span class="n">py</span><span class="p">.</span><span class="n">main</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">param</span><span class="p">);</span>
+<span class="n">if</span> <span class="s">fid</span> <span class="s">==</span> <span class="s">-1</span>
+    <span class="n">error</span><span class="p">(</span><span class="s">&quot;Cannot create JSON file&quot;</span><span class="p">);</span>
+<span class="n">end</span>
+
+<span class="s">fwrite(fid,</span> <span class="s">json_format,</span> <span class="s">&quot;char&quot;)</span><span class="p">;</span>
+<span class="n">fclose</span><span class="p">(</span><span class="n">fid</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>Simulation results are delivered as a MatLab struct datetype. Conversion of Python datatypes to MatLab may result a little bit tricky at a first sight, therefore I omit to explain data conversion from Python here and I suggest to look only to the final result, namely to the <cite>output</cite> struct, which can be navigated easily.</p>
+<p>The simulation is finally run by calling the function <em>std</em> from the module <em>main.py</em>.
+The output of the function is a Python string containing the results of the experiment in a JSON format; the string must be converted in a MatLab string and subsequently decoded by MatLab.
+String casting is performed using the function <em>string()</em> and decoding is performed using <em>jsondecode()</em>.
+The results are saved in the variable <em>results</em>, which at this point is a MatLab <em>struct</em> data type (very easy to navigate).</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="p">=</span> <span class="n">jsondecode</span><span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="n">py</span><span class="p">.</span><span class="n">main</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">param</span><span class="p">)));</span>
+</pre></div>
 </div>
-<div class="section" id="matlab-interface">
-<h2>MatLab Interface<a class="headerlink" href="#matlab-interface" title="Permalink to this headline">¶</a></h2>
-<p>The script <code class="docutils literal notranslate"><span class="pre">simulation.m</span></code> shows how to call the Python script from MatLab environment. In the following we comment line by line how the script works.</p>
+</div>
+<div class="section" id="results-extraction">
+<h3>Results Extraction<a class="headerlink" href="#results-extraction" title="Permalink to this headline">¶</a></h3>
+<p>Results and statistics are contained in the variable <em>results</em> and can be extracted by accessing its attributes..</p>
+<p>The meaning of the statistics enclosed in the output variables is explained in the Section <a class="reference internal" href="logging.html"><span class="doc">Logging and Statistics</span></a>.</p>
+</div>
 </div>
 </div>
 
@@ -143,6 +189,7 @@ Parameters which define the behaviour of trucks, shovels, dumpsites, and worksho
 </li>
 <li class="toctree-l1"><a class="reference internal" href="items_summary.html">Items Summary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging and Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
 </ul>
 

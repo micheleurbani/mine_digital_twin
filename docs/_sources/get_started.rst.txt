@@ -9,73 +9,115 @@ Python Setup
 
 As far as I tested, no installation of Python on the user OS should be necessary. A Python virtualenvironment is already present in the local folder `venv` with all the packages required to run the simulation.
 
-The MatLab script calls the local virtualenvironment autonomously.
+MatLab Interface
+================
+
+The integration between MatLab and Python was subject to major updates starting from MatLab 2019a, therefore it is warmly suggested to use MatLab 2019a or later.
+The first thing to do when we want to call Python scripts from MatLab is to clear the workspace from old variables and to specify the virtual environment we want to work with.
+It is possible to specify the Python interpreter only once per MatLab session, i.e. when you run your script a second time MatLab will raise an error unless you comment the function *pyenv()* or, better, you use the following snippet, which automatically detects the presence of a Python interpreter.
+Due to this hallmark of MatLab, whenever you modify a Python script that you want to use in MatLab, it is required to restart MatLab.
 
 .. highlight:: matlab
 
 ::
 
-    clear; close all; clc
+    clear; close all; clc;
 
-If a Python environment has not been specified, provide indications.::
-
-    if exist('pe', 'var')
+    if exist("pe", "var")
         % Retrieve the path of the local folder
         localFolder = pwd;
         % Provide local python environment (important because required
         % libraries are installed there).
-        pe = pyenv('Version',strcat(localFolder,'/venv/Scripts/python.exe'));
+        pe = pyenv("Version",strcat(localFolder,"/venv/Scripts/python.exe"));
     end
 
-The thresholds for decisions about preventive maintenance are provided as arrays.::
+Declaration of Simulation Parameters
+------------------------------------
 
-    shovelPolicy = [0.004, 0.008, 0.006];
-    truckPolicy = [0.03,0.03,0.05,0.03,0.03,0.05,0.03,0.03,0.03,0.03];
-    SIM_TIME = 5600;
-    SEED = 42;
+Simulation paramters are specified using a MatLab *struct* data type.
+It is possible to specify the following parameters:
 
-    % Call the function `sim` to run the simulation.
-    output = sim(shovelPolicy,truckPolicy,SIM_TIME,SEED);
++------------+----------+------------------------------------------------------------+
+|Name        |Data Type |Description                                                 |
++============+==========+============================================================+
+|shovelPolicy|Array     |It contains threshold values for maintenance of shovels.    |
++------------+----------+------------------------------------------------------------+
+|truckPolicy |Array     |It contains threshold values for maintenance of trucks.     |
++------------+----------+------------------------------------------------------------+
+|nShovels    |int       |The number of in the mine.                                  |
++------------+----------+------------------------------------------------------------+
+|nTrucks     |int       |The number of in the mine.                                  |
++------------+----------+------------------------------------------------------------+
+|nDumpSites  |int       |The number of in the mine.                                  |
++------------+----------+------------------------------------------------------------+
+|nWorkShops  |int       |The number of in the mine.                                  |
++------------+----------+------------------------------------------------------------+
+|simTime     |int       |The length of the simulation horizon [minutes].             |
++------------+----------+------------------------------------------------------------+
+|seed        |int       |An arbitrary value to allow replication of the experiment   |
++------------+----------+------------------------------------------------------------+
 
-.. function:: sim(shovelPolicy,truckPolicy,SIM_TIME,SEED)
+An example of parameter declaration if the following.
 
-    SIM function call a MatLab interpreter and execute a single simulation experiment using the parameters provided below. Function variables include:
+.. highlight:: matlab
 
-    :param array shovelPolicy: an array with length from 1 to 4 where the thresholds to trigger preventive maintenance are stored.
-    :param array truckPolicy: an array with length from 1 to 30 where the thresholds to trigger preventive maintenance are stored.
-    :param int SIM_TIME: the length of the simulation horizon.
-    :param int SEED: a value provided for reproducibility of the simulation instance.
-    :return: a variable of the type *struct* containing the results of the simulation
-    :rtype: struct
+::
 
-More parameters about the simulation experiment are provided to the Python interpreter by means of dictionary. Those parameters are the number of dumpsites and the number of workshops.
-Parameters which define the behaviour of trucks, shovels, dumpsites, and workshops are defined in the relative files within the folder "data".
+    % Create a struct variable where to store simulation parameters
+    param = struct();
+    % Declare shovel policy
+    param.shovelPolicy = [0.09, 0.07, 0.03];
+    % Declare truck policy
+    param.truckPolicy = [0.06, 0.03, 0.06, 0.07, 0.05,0.07, 0.05, 0.01, 0.03, 0.08];
 
-The function returns a strucs with the number of corrective and preventive interventions, and the stockpiles level histories.::
+    % Specify how many items are present in the mine
+    param.nShovels = length(param.shovelPolicy);
+    param.nTrucks = length(param.truckPolicy);
+    param.nDumpSites = 2;
+    param.nWorkShops = 2;
 
-    function output = sim(shovelPolicy,truckPolicy,SIM_TIME,SEED)
-        % Specify parameters
-        param = py.dict(...
-            pyargs(...
-            'nTrucks', int32(length(truckPolicy)), ...      % Between 1 and 30
-            'nShovels', int32(length(shovelPolicy)), ...    % Between 1 and 4
-            'nDumpSites', int32(2), ...                     % Between 1 and 5
-            'nWorkShops', int32(2), ...                     % Between 1 and 3
-            'SIM_TIME', int32(SIM_TIME), ...                % One year expressed in minutes
-            'SEED', int32(SEED), ...
-            'thresholdsPM', py.dict(...
-                pyargs(...
-                    'shovels', py.list(shovelPolicy), ...
-                    'trucks', py.list(truckPolicy) ...
-                )...
-            )...
-        ));
+    param.simTime = 100000;     % Length of thesimulation [minutes]
+    param.seed = 42;            % A value for the seed
 
-        output = py.main.std(param);
+Run a Simulation Experiment
+---------------------------
 
-Simulation results are delivered as a MatLab struct datetype. Conversion of Python datatypes to MatLab may result a little bit tricky at a first sight, therefore I omit to explain data conversion from Python here and I suggest to look only to the final result, namely to the `output` struct, which can be navigated easily.
+Before to run a simulation we need to convert the variable *param* to JSON format.
+This step allows to simplify the communication between MatLab and Python, which othrewise would require to convert MatLab data types to Python data types.
+Since the values that are passed to the Python interpreter are not objects, they can be easily read by Python.
 
-MatLab Interface
-================
+.. highlight:: matlab
 
-The script ``simulation.m`` shows how to call the Python script from MatLab environment. In the following we comment line by line how the script works.
+::
+
+    % Encode the struct using JSON format
+    json_format = jsonencode(param);
+
+    % Unconmment the following code in case you need to save the parameters in
+    % JSON format to an external file
+    fid = fopen("param.json", "w");
+
+    if fid == -1
+        error("Cannot create JSON file");
+    end
+
+    fwrite(fid, json_format, "char");
+    fclose(fid);
+
+The simulation is finally run by calling the function *std* from the module *main.py*.
+The output of the function is a Python string containing the results of the experiment in a JSON format; the string must be converted in a MatLab string and subsequently decoded by MatLab.
+String casting is performed using the function *string()* and decoding is performed using *jsondecode()*.
+The results are saved in the variable *results*, which at this point is a MatLab *struct* data type (very easy to navigate).
+
+.. highlight:: matlab
+
+::
+
+    results = jsondecode(string(py.main.std(param)));
+
+Results Extraction
+------------------
+
+Results and statistics are contained in the variable *results* and can be extracted by accessing its attributes..
+
+The meaning of the statistics enclosed in the output variables is explained in the Section :doc:`logging`.

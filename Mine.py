@@ -179,7 +179,7 @@ class Truck(object):
                 expTaskTime = self.estimateExpTaskTime(shovel)
                 if self.doPreventiveMaintenance(expTaskTime=expTaskTime):
                     self.env.statistics["Truck%d" % self.id]["PreventiveInterventions"] += 1
-                    self.env.statistics["Truck%d" % self.id]["PreventiveMaintenanceHistory"].append([self.env.now, self.id, self.Cp])
+                    self.env.statistics["Truck%d" % self.id]["PreventiveMaintenanceHistory"].append([self.env.now, self.Cp])
                     # ASSIGN A WORKSHOP
                     workshop = self.assignment(workshops)
                     # DELETE OLD FAULT EVENT
@@ -219,7 +219,7 @@ class Truck(object):
                 if DEBUG:
                     self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      failed             at %.2f." % (self.id, self.env.now))
                 self.env.statistics["Truck%d" %self.id]["Failure"] += 1
-                self.env.statistics["Truck%d" %self.id]["FailureHistory"].append([self.env.now, self.id, self.Cc])
+                self.env.statistics["Truck%d" %self.id]["FailureHistory"].append([self.env.now, self.Cc])
                 # ASSIGN A WORKSHOP
                 workshop = self.assignment(workshops)
                 # TRAVEL

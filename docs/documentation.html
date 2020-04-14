@@ -15,7 +15,7 @@
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Workflows" href="workflows.html" />
+    <link rel="prev" title="Logging and Statistics" href="logging.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -79,7 +79,7 @@ At the bottom of the page, the documentation of some <a class="reference interna
 <code class="sig-name descname">doPreventiveMaintenance</code><span class="sig-paren">(</span><em class="sig-param">expTaskTime</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Shovel.doPreventiveMaintenance" title="Permalink to this definition">¶</a></dt>
 <dd><p>The decision rule to trigger a preventive maintenance intervention is enclosed in the method. The rule used is the following.</p>
 <div class="math notranslate nohighlight">
-\[P(t &lt; T &lt; \Delta t | T &gt; t) &gt; \text{threshold}\]</div>
+\[P(t &lt; T &lt; \Delta t | T &gt; t) &gt; \    ext{threshold}\]</div>
 </dd></dl>
 
 <dl class="method">
@@ -120,7 +120,7 @@ At the bottom of the page, the documentation of some <a class="reference interna
 <dd><p>The function returns the item <span class="math notranslate nohighlight">\(i\)</span> (shovel, dumpsite, workshop) to which the Truck is assigned among a set of items <span class="math notranslate nohighlight">\(I\)</span>, which is provided as a list.
 The value <span class="math notranslate nohighlight">\(i\)</span> is returned by the following equation.</p>
 <div class="math notranslate nohighlight">
-\[\text{argmin}_{i \in I} = \mathbb{E} [ \text{travel distance to $i$} ] + \mathbb{E} [ \text{waiting time at $i$} ]\]</div>
+\[\    ext{argmin}_{i \in I} = \mathbb{E} [ \    ext{travel distance to $i$} ] + \mathbb{E} [ \    ext{waiting time at $i$} ]\]</div>
 </dd></dl>
 
 <dl class="method">
@@ -128,7 +128,7 @@ The value <span class="math notranslate nohighlight">\(i\)</span> is returned by
 <code class="sig-name descname">doPreventiveMaintenance</code><span class="sig-paren">(</span><em class="sig-param">expTaskTime</em><span class="sig-paren">)</span><a class="headerlink" href="#Mine.Truck.doPreventiveMaintenance" title="Permalink to this definition">¶</a></dt>
 <dd><p>The decision rule to trigger a preventive maintenance intervention is enclosed in the method. The rule used is the following.</p>
 <div class="math notranslate nohighlight">
-\[P(t &lt; T &lt; \Delta t | T &gt; t) &gt; \text{threshold}\]</div>
+\[P(t &lt; T &lt; \Delta t | T &gt; t) &gt; \    ext{threshold}\]</div>
 </dd></dl>
 
 <dl class="method">
@@ -262,6 +262,7 @@ order by their <em>priority</em> (that means lower values are more important).</
 <li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="items_summary.html">Items Summary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging and Statistics</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#simpy-resources">Simpy resources</a></li>
 </ul>
@@ -272,7 +273,7 @@ order by their <em>priority</em> (that means lower values are more important).</
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="workflows.html" title="previous chapter">Workflows</a></li>
+      <li>Previous: <a href="logging.html" title="previous chapter">Logging and Statistics</a></li>
   </ul></li>
 </ul>
 </div>
