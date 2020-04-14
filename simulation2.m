@@ -13,7 +13,7 @@ param = struct();
 % Declare shovel policy
 param.shovelPolicy = [0.09489149715167379, 0.07855350468377378, 0.031012480624588046];
 % Declare truck policy
-param.truckPolicy = [0.06383568139931146, 0.06256905803502141, 0.007347536683141531, 0.058981953297324585, 0.07878249800333016, 0.05058120249898333, 0.013447304537421411, 0.03475903556714466, 0.08335430697158006];
+param.truckPolicy = [0.06383568139931146, 0.031012480624588046, 0.06256905803502141, 0.007347536683141531, 0.058981953297324585, 0.07878249800333016, 0.05058120249898333, 0.013447304537421411, 0.03475903556714466, 0.08335430697158006];
 
 % Specify how many items are present in the mine
 param.nShovels = length(param.shovelPolicy);
@@ -21,7 +21,7 @@ param.nTrucks = length(param.truckPolicy);
 param.nDumpSites = 2;
 param.nWorkShops = 2;
 
-param.simTime = 10000;      % Length of thesimulation [minutes]
+param.simTime = 100000;      % Length of thesimulation [minutes]
 param.seed = 42;            % A value for the seed
 
 % Encode the struct using JSON format
@@ -34,5 +34,5 @@ if fid == -1, error('Cannot create JSON file'); end
 fwrite(fid, json_format, 'char');
 fclose(fid);
 
-statistics = jsondecode(string(py.main.std(param)));
+results = jsondecode(string(py.main.std(param)));
 

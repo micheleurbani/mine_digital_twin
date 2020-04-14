@@ -102,13 +102,19 @@ def std(param):
     print('End')
     processingTime = datetime.now() - begin
     print("Processing time ", processingTime)
+    # Results and statistics update
     for i in range(len(trucks)):
         print("Truck%d: \tFailures =" %i, env.statistics["Truck%d" %i]["Failure"], "\t Preventive =", env.statistics["Truck%d" %i]["PreventiveInterventions"])
+        s = env.statistics["Truck%d"%i]["Statistics"]
+        s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"]) / (param["simTime"])
     for i in range(len(shovels)):
         print("Shovel%d:\tFailures =" %i, env.statistics["Shovel%d" %i]["Failure"], "\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
+        s = env.statistics["Shovel%d"%i]["Statistics"]
+        s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"] + s['TravelTime']) / (param["simTime"])
+        s["IdleTime"] = param["simTime"] - s["WorkingTime"] - s["TravelTime"] - s["TimeInQueue"] - s["Failed"] - s["PMRepair"] - s["CMRepair"] 
 
-    # return json.dumps(env.statistics)
-    return env.statistics
+    # return env.statistics
+    return json.dumps(env.statistics)
 
 def test(SIM_TIME,seed):
     """The function run a single instance of the simulation experiment.
@@ -580,5 +586,7 @@ if __name__ == "__main__":
         param = json.load(f)
 
     stats = std(param)
-    for i in stats['Shovel1']['History']:
-        print(i)
+    print(stats['Shovel1']['Statistics'])
+    # with open('results.json', 'w') as f:
+    #     json.dump(stats, f)
+
