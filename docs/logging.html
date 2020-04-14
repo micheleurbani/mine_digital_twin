@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Logging and Statistics &#8212; Mine Digital Twin 1.0.2 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Documentation of Mine.py" href="documentation.html" />
+    <link rel="prev" title="Workflows" href="workflows.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="logging-and-statistics">
+<h1>Logging and Statistics<a class="headerlink" href="#logging-and-statistics" title="Permalink to this headline">¶</a></h1>
+<p>Every time an experiment is run, a set of statistics and histories are collected and summarized for all the items in the mine.
+Each type of item has its own set of statistics, which better characterize its behavior duting the experiment.</p>
+<div class="section" id="trucks">
+<h2>Trucks<a class="headerlink" href="#trucks" title="Permalink to this headline">¶</a></h2>
+<p>Trucks statistics can be accessed using the name of the truck, e.g. <em>Truck#</em> where # is the number of the truck.</p>
+<p>From there one can access the following properties:</p>
+<table class="docutils align-default" id="truck-attributes">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Failure</p></td>
+<td><p>the number of failures to which the truck was subject</p></td>
+</tr>
+<tr class="row-odd"><td><p>FailureHistory</p></td>
+<td><p>an array containing the time of the failure event and its cost</p></td>
+</tr>
+<tr class="row-even"><td><p>PreventiveInterventions</p></td>
+<td><p>the number of PM interventions</p></td>
+</tr>
+<tr class="row-odd"><td><p>PreventiveMaintenanceHistory</p></td>
+<td><p>an array containing the time of PM interventions and their cost</p></td>
+</tr>
+<tr class="row-even"><td><p>History</p></td>
+<td><p>a cell array containing a human-friendly description of events</p></td>
+</tr>
+<tr class="row-odd"><td><p>Statistics</p></td>
+<td><p>a struct variable containing a few statistics about the performance of the truck. More about <em>Statistics</em> can be find below.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The attribute <em>Statistics</em> contains meaningful numbers about the history of the truck. Each field express amount of time (in minutes) that the truck spents at doing a specific activity; exception made for <em>availability</em>, which is a percentage.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>TravelTime</p></td>
+<td><p>The time spent traveling among sites; it doesn’t include the time to travel to a workshop after a failure, which is accounted in <em>Failed</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>TimeInQueue</p></td>
+<td><p>The total time spent waiting in queue</p></td>
+</tr>
+<tr class="row-even"><td><p>TimeUnderLoading</p></td>
+<td><p>The total time spent for loading operations</p></td>
+</tr>
+<tr class="row-odd"><td><p>TimeUnderUnloading</p></td>
+<td><p>The total time spent for unloading operations</p></td>
+</tr>
+<tr class="row-even"><td><p>PMRepair</p></td>
+<td><p>The total time spent under PM</p></td>
+</tr>
+<tr class="row-odd"><td><p>CMRepair</p></td>
+<td><p>The total time spent under CM</p></td>
+</tr>
+<tr class="row-even"><td><p>Failed</p></td>
+<td><p>The total time spent moving from the point where failure occurred and a workshop</p></td>
+</tr>
+<tr class="row-odd"><td><p>Availability</p></td>
+<td><p>The fraction of time that the truck is working</p></td>
+</tr>
+</tbody>
+</table>
+<p>Availability is calculated as follow:</p>
+<div class="math notranslate nohighlight" id="availability">
+\[Availability = \frac{\text{Simulation Time} - \left( \text{CMRepair} + \text{PMRepair} + \text{Failed} \right)}{\text{Simulation Time}}\]</div>
+</div>
+<div class="section" id="shovels">
+<h2>Shovels<a class="headerlink" href="#shovels" title="Permalink to this headline">¶</a></h2>
+<p>Shovels’ statistics can be accessed the same way as trucks, i.e. by browsing the attibute <em>Shovel#</em> of the variable containing results.</p>
+<p>The main attributes are the same as for trucks, please consult the Table <a class="reference internal" href="#truck-attributes">truck_attributes</a>.</p>
+<p>The content of the attribute <em>Statistics</em> is different from that of a truck and it is detailed below.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>TravelTime</p></td>
+<td><p>The time spent traveling from the work site to a workshop due <strong>only to PM</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>TimeInQueue</p></td>
+<td><p>The total time spent waiting in queue at a workshop. A shovel has priority over trucks, therefore it is served as soon as the truck under repair is done</p></td>
+</tr>
+<tr class="row-even"><td><p>PMRepair</p></td>
+<td><p>The total time spent under PM</p></td>
+</tr>
+<tr class="row-odd"><td><p>CMRepair</p></td>
+<td><p>The total time spent under CM</p></td>
+</tr>
+<tr class="row-even"><td><p>Failed</p></td>
+<td><p>The total time spent moving from the point where failure occurred and a workshop</p></td>
+</tr>
+<tr class="row-odd"><td><p>Availability</p></td>
+<td><p>The fraction of time that the truck is working. It is calculated the same way as for trucks (<a class="reference internal" href="#availability">availability</a>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="dumpsites">
+<h2>Dumpsites<a class="headerlink" href="#dumpsites" title="Permalink to this headline">¶</a></h2>
+<p>Dumpsites statistics consist only of the amount of material that is added to the stockpile of each dumpsite.</p>
+<p>You can access each dumpsite’s statistics through the attibute <em>DumpSite#</em> of the variable containing the results of the experiment.
+Within such attribute you will find only an array, which rows account for the time at which a new discharge of material occurred and the amount of matrials that has been discharged.
+In order to obtain the stockpile level you have to sum the amounts in the second column (i.e., those that store the amount discharged each time).</p>
+</div>
+<div class="section" id="workshops">
+<h2>Workshops<a class="headerlink" href="#workshops" title="Permalink to this headline">¶</a></h2>
+<p>At the moment, no statistics are collected for workshops.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Mine Digital Twin</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="items_summary.html">Items Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Logging and Statistics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#trucks">Trucks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#shovels">Shovels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dumpsites">Dumpsites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#workshops">Workshops</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="workflows.html" title="previous chapter">Workflows</a></li>
+      <li>Next: <a href="documentation.html" title="next chapter">Documentation of Mine.py</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Michele Urbani.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/logging.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,99 @@
+======================
+Logging and Statistics
+======================
+
+Every time an experiment is run, a set of statistics and histories are collected and summarized for all the items in the mine.
+Each type of item has its own set of statistics, which better characterize its behavior duting the experiment.
+
+Trucks
+======
+
+Trucks statistics can be accessed using the name of the truck, e.g. *Truck#* where # is the number of the truck.
+
+From there one can access the following properties:
+
+.. _truck_attributes:
+
++-------------------------------+-------------------------------------------------------------------------------------------------------------------------------+
+|Attribute Name                 |Description                                                                                                                    |
++===============================+===============================================================================================================================+
+|Failure                        | the number of failures to which the truck was subject                                                                         |
++-------------------------------+-------------------------------------------------------------------------------------------------------------------------------+
+|FailureHistory                 | an array containing the time of the failure event and its cost                                                                |
++-------------------------------+-------------------------------------------------------------------------------------------------------------------------------+
+|PreventiveInterventions        | the number of PM interventions                                                                                                |
++-------------------------------+-------------------------------------------------------------------------------------------------------------------------------+
+|PreventiveMaintenanceHistory   | an array containing the time of PM interventions and their cost                                                               |
++-------------------------------+-------------------------------------------------------------------------------------------------------------------------------+
+|History                        | a cell array containing a human-friendly description of events                                                                |
++-------------------------------+-------------------------------------------------------------------------------------------------------------------------------+
+|Statistics                     | a struct variable containing a few statistics about the performance of the truck. More about *Statistics* can be find below.  |
++-------------------------------+-------------------------------------------------------------------------------------------------------------------------------+
+
+The attribute *Statistics* contains meaningful numbers about the history of the truck. Each field express amount of time (in minutes) that the truck spents at doing a specific activity; exception made for *availability*, which is a percentage.
+
++-------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+|Attribute Name     |Description                                                                                                                                |
++===================+===========================================================================================================================================+
+|TravelTime         |The time spent traveling among sites; it doesn't include the time to travel to a workshop after a failure, which is accounted in *Failed*  |
++-------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+|TimeInQueue        |The total time spent waiting in queue                                                                                                      |
++-------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+|TimeUnderLoading   |The total time spent for loading operations                                                                                                |
++-------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+|TimeUnderUnloading |The total time spent for unloading operations                                                                                              |
++-------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+|PMRepair           |The total time spent under PM                                                                                                              |
++-------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+|CMRepair           |The total time spent under CM                                                                                                              |
++-------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+|Failed             |The total time spent moving from the point where failure occurred and a workshop                                                           |
++-------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+|Availability       |The fraction of time that the truck is working                                                                                             |
++-------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+
+Availability is calculated as follow:
+
+.. _availability:
+.. math::
+
+    Availability = \frac{\text{Simulation Time} - \left( \text{CMRepair} + \text{PMRepair} + \text{Failed} \right)}{\text{Simulation Time}}
+
+Shovels
+=======
+
+Shovels' statistics can be accessed the same way as trucks, i.e. by browsing the attibute *Shovel#* of the variable containing results.
+
+The main attributes are the same as for trucks, please consult the Table truck_attributes_.
+
+The content of the attribute *Statistics* is different from that of a truck and it is detailed below.
+
++-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
+|Attribute Name     |Description                                                                                                                                             |
++===================+========================================================================================================================================================+
+|TravelTime         |The time spent traveling from the work site to a workshop due **only to PM**                                                                            |
++-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
+|TimeInQueue        |The total time spent waiting in queue at a workshop. A shovel has priority over trucks, therefore it is served as soon as the truck under repair is done|
++-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
+|PMRepair           |The total time spent under PM                                                                                                                           |
++-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
+|CMRepair           |The total time spent under CM                                                                                                                           |
++-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
+|Failed             |The total time spent moving from the point where failure occurred and a workshop                                                                        |
++-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
+|Availability       |The fraction of time that the truck is working. It is calculated the same way as for trucks (availability_)                                             |
++-------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Dumpsites
+=========
+
+Dumpsites statistics consist only of the amount of material that is added to the stockpile of each dumpsite.
+
+You can access each dumpsite's statistics through the attibute *DumpSite#* of the variable containing the results of the experiment.
+Within such attribute you will find only an array, which rows account for the time at which a new discharge of material occurred and the amount of matrials that has been discharged.
+In order to obtain the stockpile level you have to sum the amounts in the second column (i.e., those that store the amount discharged each time).
+
+Workshops
+=========
+
+At the moment, no statistics are collected for workshops.
