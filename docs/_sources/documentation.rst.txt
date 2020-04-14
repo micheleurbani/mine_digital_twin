@@ -1,11 +1,9 @@
-.. _documentation:
-
 ========================
 Documentation of Mine.py
 ========================
 
 In the following, the documentation of the classes in the module Mine.py is produced automatically.
-*Mine.py* contains all the classes for the objects currently in use in the simulation and the simulation procedures as presented in :ref:`get_started`.
+*Mine.py* contains all the classes for the objects currently in use in the simulation and the simulation procedures as presented in :doc:`Get Started <get_started>`.
 At the bottom of the page, the documentation of some :ref:`Simpy resources <simpy_resources>` classes is reported.
 
 .. automodule:: Mine

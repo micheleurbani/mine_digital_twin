@@ -1,5 +1,3 @@
-.. _get_started:
-
 ===========
 Get Started
 ===========
@@ -120,4 +118,4 @@ Results Extraction
 
 Results and statistics are contained in the variable *results* and can be extracted by accessing its attributes..
 
-The meaning of the statistics enclosed in the output variables is explained in the Section :doc:`logging`.
+The meaning of the statistics enclosed in the output variables is explained in the Section :doc:`Logging and Statistics<./logging>`.

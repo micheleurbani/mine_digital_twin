@@ -14,6 +14,6 @@ Items of the mine environment are the following:
 
 * **WorkShops**: are modeled using the class :class:`Mine.WorkShop`. The serving time of a workshop depends on the repair time of the item that is served. The queue of items (they could be both trucks or shovels) is managed by a :class:`simpy.PriorityResource`.
 
-In the next section - :ref:`Get Started <get_started>` - we show how to get started with the use of the library from both MatLab and Python environment.
+In the next section - :doc:`Get Started <get_started>` - we show how to get started with the use of the library from both MatLab and Python environment.
 
-The documentation of the code is available at the following link :ref:`documentation`.
+The documentation of the code is available at the following link :doc:`Documentation <documentation>`.
