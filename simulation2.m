@@ -21,18 +21,32 @@ param.nTrucks = length(param.truckPolicy);
 param.nDumpSites = 2;
 param.nWorkShops = 2;
 
+param.initialTime = 0;       % The initial time of the simulation [minutes]
 param.simTime = 100000;      % Length of thesimulation [minutes]
-param.seed = 42;            % A value for the seed
+param.seed = 42;             % A value for the seed
 
 % Encode the struct using JSON format
 json_format = jsonencode(param);
 
 % Unconmment the following code in case you need to save the parameters in
 % JSON format to an external file
-fid = fopen('param.json', 'w');
-if fid == -1, error('Cannot create JSON file'); end
-fwrite(fid, json_format, 'char');
-fclose(fid);
+% fid = fopen('param.json', 'w');
+% if fid == -1, error('Cannot create JSON file'); end
+% fwrite(fid, json_format, 'char');
+% fclose(fid);
 
-results = jsondecode(string(py.main.std(param)));
+output = cell(py.main.std(param));
+
+experiment_results = jsondecode(string(output{1}));
+items_status = jsondecode(string(output{2}));
+
+% Update the initial time and change the seed (or left it blank)
+param.initialTime = param.simTime;
+param.seed = [];
+% You can also change maintenance policies
+param.shovelPolicy = [0.08, 0.06, 0.035];
+
+% For the new run of the experiment the status of the items has to be
+% provided
+output = py.main.std(param, items_status);
 

@@ -40,7 +40,9 @@ class Truck(object):
         dumpsites,
         workshops,
         muCapacity,
-        sigmaCapacity
+        sigmaCapacity,
+        lastMaintenance=0,
+        nextFault=None,
     ):
         self.id = id
         self.env = env
@@ -56,17 +58,19 @@ class Truck(object):
         self.Cp = Cp
         self.lastMaintenance = 0
         self.p = p
-        self.nextFault = 0
+        self.nextFault = nextFault
         self.coordinates = (0,0)
         self.broken = False
         self.priority = 3
-        self.failure = env.process(self.fault())
+        self.failure = env.process(self.fault(nextFault=nextFault))
         self.env.statistics["Truck%d" %self.id] = {
             "Failure": 0,
             "FailureHistory": list(),
             "PreventiveInterventions": 0,
             "PreventiveMaintenanceHistory": list(),
             "History": list(),
+            "LastMaintenance": 0,
+            "NextFault": 0,
             "Statistics": dict(
                 TravelTime=0,
                 TimeInQueue=0,
@@ -250,12 +254,15 @@ class Truck(object):
                 # REGENERATE THE FAULT EVENT
                 self.failure = self.env.process(self.fault())
 
-    def fault(self):
+    def fault(self, nextFault=None):
         """ The method generates a fault every now and then."""
         try:
-            ttf = 60 * random.weibullvariate(alpha=self.alpha,beta=self.beta)
+            if nextFault is None:
+                ttf = 60 * random.weibullvariate(alpha=self.alpha,beta=self.beta)
+            else:
+                ttf = nextFault - self.env.now
             self.nextFault = self.env.now + ttf
-            # print(self.nextFault,ttf)
+            self.env.statistics["Truck%d" %self.id]["NextFault"] = self.nextFault
             yield self.env.timeout(ttf)
             self.process.interrupt(cause=(2,"Truck%d" % self.id))
         except simpy.Interrupt:
@@ -373,7 +380,9 @@ class Shovel(Server):
         Cc,
         Cp,
         p,
-        workshops
+        workshops,
+        lastMaintenance=0,
+        nextFault=None,
     ):
         super().__init__(env, id, coordinates,mu,sigma)
         self.alpha = alpha
@@ -383,13 +392,13 @@ class Shovel(Server):
         self.muCorrective = muCorrective
         self.sigmaCorrective = sigmaCorrective
         self.machine = simpy.PreemptiveResource(env,capacity=1)
-        self.nextFault = None
+        self.nextFault = nextFault
         self.Cc = Cc
         self.Cp = Cp
         self.lastMaintenance = 0
         self.p = p
         self.workshops = workshops
-        self.failure = env.process(self.fault())
+        self.failure = env.process(self.fault(nextFault=nextFault))
 
         env.statistics["Shovel%d" %self.id] = {
             "Failure": 0,
@@ -397,6 +406,8 @@ class Shovel(Server):
             "PreventiveInterventions": 0,
             "PreventiveMaintenanceHistory": list(),
             "History": list(),
+            "LastMaintenance": 0,
+            "NextFault": 0,
             "Statistics": dict(
                 TravelTime=0,
                 TimeInQueue=0,
@@ -442,11 +453,14 @@ class Shovel(Server):
         travelTime = self.distance(destination)
         yield self.env.timeout(travelTime)
 
-    def fault(self):
+    def fault(self, nextFault=None):
 
         while True:
             try:
-                ttf = self.timeToFailure()
+                if nextFault is None:
+                    ttf = self.timeToFailure()
+                else:
+                    ttf = nextFault - self.env.now
                 self.nextFault = self.env.now + ttf
                 yield self.env.timeout(ttf)
                 if not self.broken:
@@ -604,12 +618,14 @@ class WorkShop(Server):
         self.machine = simpy.PriorityResource(env,capacity=1)
 
     def correctiveRepair(self,equipment):
-        equipment.lastMaintenance = self.env.now
-        yield self.env.timeout(equipment.timeToRepairCorrective())
+        ttr = equipment.timeToRepairCorrective()
+        equipment.lastMaintenance = self.env.now + ttr
+        yield self.env.timeout(ttr)
 
     def preventiveMaintenance(self,equipment):
-        equipment.lastMaintenance = self.env.now
-        yield self.env.timeout(equipment.timeToRepairPreventive())
+        ttr = equipment.timeToRepairPreventive()
+        equipment.lastMaintenance = self.env.now + ttr
+        yield self.env.timeout(ttr)
 
     def waitingTime(self):
         return len(self.machine.queue) + self.machine.count

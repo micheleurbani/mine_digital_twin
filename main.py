@@ -6,7 +6,7 @@ from statistics import mean
 # from tqdm import tqdm
 # from multiprocessing import Pool
 
-def std(param):
+def std(param, time_parameters=None):
     """
     The function asks for a dictionary where we specify the parameters required by the simulation. Parameters are listed below:
 
@@ -34,7 +34,7 @@ def std(param):
     assert len(param['truckPolicy']) == param['nTrucks']
 
     # Create the simulation environment
-    env = simpy.Environment()
+    env = simpy.Environment(initial_time=param['initialTime'])
     env.statistics = dict()
 
     with open("data/workshops_data.csv","r",newline="\n") as f:
@@ -65,6 +65,10 @@ def std(param):
             p=param['shovelPolicy'][i],
             workshops=workshops)
         for i in range(int(param['nShovels']))]
+    if param['initialTime'] > 0:
+        for shovel in shovels:
+            shovel.lastMaintenance = time_parameters["Shovel%d"%shovel.id]["LastMaintenance"]
+            shovel.nextFault = time_parameters["Shovel%d"%shovel.id]["NextFault"]
 
     with open("data/dumpsites_data.csv","r",newline="\n") as f:
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
@@ -76,7 +80,6 @@ def std(param):
     with open("data/truck_data.csv","r",newline="\n") as f:
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
         truckData = [x for x in doc]
-
     trucks = [Truck(
         alpha=truckData[i][0],
         beta=truckData[i][1],
@@ -95,26 +98,40 @@ def std(param):
         muCapacity=truckData[i][8],
         sigmaCapacity=truckData[i][9])
         for i in range(int(param["nTrucks"]))]
+    if param['initialTime'] > 0:
+        for truck in trucks:
+            truck.lastMaintenance = time_parameters["Truck%d"%truck.id]["LastMaintenance"]
+            truck.nextFault = time_parameters["Truck%d"%truck.id]["NextFault"]
 
-    random.seed(param["seed"])
+    try:
+        random.seed(param["seed"])
+    except:
+        pass
     begin = datetime.now()
-    env.run(until=param["simTime"])
+    env.run(until=param["initialTime"] + param["simTime"])
     print('End')
     processingTime = datetime.now() - begin
     print("Processing time ", processingTime)
+    time_parameters = dict()
     # Results and statistics update
     for i in range(len(trucks)):
         print("Truck%d: \tFailures =" %i, env.statistics["Truck%d" %i]["Failure"], "\t Preventive =", env.statistics["Truck%d" %i]["PreventiveInterventions"])
         s = env.statistics["Truck%d"%i]["Statistics"]
         s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"]) / (param["simTime"])
+        time_parameters["Truck%d"%i] = dict()
+        time_parameters["Truck%d"%i]["LastMaintenance"] = trucks[i].lastMaintenance
+        time_parameters["Truck%d"%i]["NextFault"] = trucks[i].nextFault
     for i in range(len(shovels)):
         print("Shovel%d:\tFailures =" %i, env.statistics["Shovel%d" %i]["Failure"], "\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
         s = env.statistics["Shovel%d"%i]["Statistics"]
         s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"] + s['TravelTime']) / (param["simTime"])
-        s["IdleTime"] = param["simTime"] - s["WorkingTime"] - s["TravelTime"] - s["TimeInQueue"] - s["Failed"] - s["PMRepair"] - s["CMRepair"] 
+        s["IdleTime"] = param["simTime"] - s["WorkingTime"] - s["TravelTime"] - s["TimeInQueue"] - s["Failed"] - s["PMRepair"] - s["CMRepair"]
+        time_parameters["Shovel%d"%i] = dict()
+        time_parameters["Shovel%d"%i]["LastMaintenance"] = shovels[i].lastMaintenance
+        time_parameters["Shovel%d"%i]["NextFault"] = shovels[i].nextFault
 
     # return env.statistics
-    return json.dumps(env.statistics)
+    return json.dumps(env.statistics), json.dumps(time_parameters)
 
 def test(SIM_TIME,seed):
     """The function run a single instance of the simulation experiment.
@@ -493,12 +510,11 @@ def mineMap(thresholds):
     plt.savefig("figures/mine_map.png")
 
 if __name__ == "__main__":
-    # with open('param.json', 'r') as f:
-    #     param = json.load(f)
+    with open('param.json', 'r') as f:
+        param = json.load(f)
 
-    # stats = std(param)
+    stats = std(param)
     # print(stats['Shovel1']['Statistics'])
     # with open('results.json', 'w') as f:
     #     json.dump(stats, f)
-    pass
 
