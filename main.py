@@ -10,23 +10,35 @@ def std(param, time_parameters=None):
     """
     The function asks for a dictionary where we specify the parameters required by the simulation. Parameters are listed below:
 
-    -  nTrucks:        the number of trucks simulated
-    -  nShovels:       the number of shovels simulated
-    -  nDumpSites:     the number of dumpsites simulated
-    -  nWorkShops:     the number of workshops simulated
-    -  shovelPolicy:   a list containing the thresholds for maintenance of shovels
-    -  truckPolicy:    a list containing the thresholds for maintenance of trucks
-    -  thresholdsPM:   a dictionary with PM thresholds for trucks and shovels
-    -  simTime:       the simulation time in minutes
-    -  seed:           a value for the seed (not relevant if replication of results is not required)
+    - nTrucks:        the number of trucks simulated
+    - nShovels:       the number of shovels simulated
+    - nDumpSites:     the number of dumpsites simulated
+    - nWorkShops:     the number of workshops simulated
+    - shovelPolicy:   a list containing the thresholds for maintenance of shovels
+    - truckPolicy:    a list containing the thresholds for maintenance of trucks
+    - thresholdsPM:   a dictionary with PM thresholds for trucks and shovels
+    - simTime:        the simulation time in minutes
+    - seed:           a value for the seed (not relevant if replication of results is not required)
+    - initialTime:    the absolute time value from which the experiment is restarted [in minutes]
 
-    The function returns the following statistics (in a dictionary):
+    In order to continue an experiment previously stopped, it is also possible to specify the maintenance parameters from the last execution of the experiment using the variable *time_parameters*. For each truck and shovel, the dictionary contains:
+
+    - LastMaintenance: the absolute time of the last maintenance interventions [in minutes]
+    - NextFault: the absolute time of the next fault [in minutes]
+
+    The function returns two dictionaries.
+    The first contains the following statistics:
     - Number of maintenance interventions per each truck and shovel, subdivided in:
         -- preventive interventions
         -- corrective interventions
     - Maintenance history of trucks and shovels
     - More statistics on usage of trucks and shovels
-    - Stockpiles levels as a function of time
+    - Stockpiles levels as a function of time for dumpsites
+
+    A second dictionary contains the information to restore the experiment from the point where it was interrupted. For each truck and shovel the dictionary contains:
+
+    - the absolute time of the last maintenance interventions [in minutes]
+    - the absolute time of the next fault [in minutes]
 
     """
 

@@ -285,7 +285,7 @@ class Truck(object):
 
         .. math::
 
-            \    ext{argmin}_{i \\in I} = \\mathbb{E} [ \    ext{travel distance to $i$} ] + \\mathbb{E} [ \    ext{waiting time at $i$} ]
+            \\arg\min_{i \\in I} = \{ \\mathbb{E} [ \\text{travel distance to $i$} ] + \\mathbb{E} [ \\text{waiting time at $i$} ] \}
 
         """
         x, candidate = 1e6, None
@@ -307,7 +307,15 @@ class Truck(object):
 
         .. math::
 
-            P(t < T < \\Delta t | T > t) > \    ext{threshold}
+            P(t < T < t + \Delta t | T > t) > \\text{threshold}
+
+        The expected duration of the next tast :math:`\Delta t` is calculated using the following equation:
+
+        .. math::
+
+            \Delta t = \min_{i \in W} \{ \\mathbb{E} [ \\text{travel distance to $i$} ] + \\mathbb{E} [ \\text{waiting time at $i$} ] \}
+
+        where :math:`W` is the set of workshops.
 
         """
         def weibull(x):

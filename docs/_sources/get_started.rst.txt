@@ -35,27 +35,27 @@ Declaration of Simulation Parameters
 Simulation paramters are specified using a MatLab *struct* data type.
 It is possible to specify the following parameters:
 
-+------------+----------+------------------------------------------------------------+
-|Name        |Data Type |Description                                                 |
-+============+==========+============================================================+
-|shovelPolicy|Array     |It contains threshold values for maintenance of shovels.    |
-+------------+----------+------------------------------------------------------------+
-|truckPolicy |Array     |It contains threshold values for maintenance of trucks.     |
-+------------+----------+------------------------------------------------------------+
-|nShovels    |int       |The number of in the mine.                                  |
-+------------+----------+------------------------------------------------------------+
-|nTrucks     |int       |The number of in the mine.                                  |
-+------------+----------+------------------------------------------------------------+
-|nDumpSites  |int       |The number of in the mine.                                  |
-+------------+----------+------------------------------------------------------------+
-|nWorkShops  |int       |The number of in the mine.                                  |
-+------------+----------+------------------------------------------------------------+
-|simTime     |int       |The length of the simulation horizon [minutes].             |
-+------------+----------+------------------------------------------------------------+
-|seed        |int       |An arbitrary value to allow replication of the experiment   |
-+------------+----------+------------------------------------------------------------+
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
+|Name        |Data Type |Description                                                                                                        |
++============+==========+===================================================================================================================+
+|shovelPolicy|Array     |It contains threshold values for maintenance of shovels.                                                           |
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
+|truckPolicy |Array     |It contains threshold values for maintenance of trucks.                                                            |
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
+|nShovels    |int       |The number of in the mine.                                                                                         |
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
+|nTrucks     |int       |The number of in the mine.                                                                                         |
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
+|nDumpSites  |int       |The number of in the mine.                                                                                         |
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
+|nWorkShops  |int       |The number of in the mine.                                                                                         |
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
+|simTime     |int       |The length of the simulation horizon [minutes].                                                                    |
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
+|seed        |int       |An arbitrary value to allow replication of the experiment. If it is left blank, a random value will be assigned.   |
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
 
-An example of parameter declaration if the following.
+An example of parameter declaration is the following.
 
 .. highlight:: matlab
 
@@ -82,7 +82,7 @@ Run a Simulation Experiment
 
 Before to run a simulation we need to convert the variable *param* to JSON format.
 This step allows to simplify the communication between MatLab and Python, which othrewise would require to convert MatLab data types to Python data types.
-Since the values that are passed to the Python interpreter are not objects, they can be easily read by Python.
+Since the values that are passed to Python are only integer and float types, they can be easily read by Python.
 
 .. highlight:: matlab
 
@@ -103,15 +103,35 @@ Since the values that are passed to the Python interpreter are not objects, they
     fclose(fid);
 
 The simulation is finally run by calling the function *std* from the module *main.py*.
-The output of the function is a Python string containing the results of the experiment in a JSON format; the string must be converted in a MatLab string and subsequently decoded by MatLab.
+The output of the function is a Python tuple containing the results of the experiment and the parameters required to restart the simulation, both in a JSON format.
+The tuple must be casted into a MatLab cell array using the function *cell()*.
+Each of the fields of the cell contains a Python string, which in turn must be converted in a MatLab string and subsequently decoded by MatLab.
 String casting is performed using the function *string()* and decoding is performed using *jsondecode()*.
-The results are saved in the variable *results*, which at this point is a MatLab *struct* data type (very easy to navigate).
 
 .. highlight:: matlab
 
 ::
 
-    results = jsondecode(string(py.main.std(param)));
+    output = cell(py.main.std(param));
+
+    experiment_results = jsondecode(string(output{1}));
+    items_status = jsondecode(string(output{2}));
+
+You can change some parameters, e.g. maintenance thresholds, and restart the experiment from the point when it was stopped.
+
+.. highlight:: matlab
+
+::
+
+    % Update the initial time and change the seed (or left it blank)
+    param.initialTime = param.simTime;
+    param.seed = [];
+    % You can also change maintenance policies
+    param.shovelPolicy = [0.08, 0.06, 0.035];
+
+    % For the new run of the experiment the status of the items has to be provided
+    output = py.main.std(param, items_status);
+
 
 Results Extraction
 ------------------
