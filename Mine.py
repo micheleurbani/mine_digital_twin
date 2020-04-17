@@ -143,7 +143,7 @@ class Truck(object):
                 # CHECK SHOVEL FOR PREVENTIVE MAINTENANCE
                 workshop = shovel.assignment(workshops)
                 expTaskTime = shovel.distance(workshop.coordinates) + shovel.waitingTime()
-                if shovel.doPreventiveMaintenance(expTaskTime):
+                if shovel.doPreventiveMaintenanceAgeBased(expTaskTime):
                     # Interrupt failure process
                     shovel.failure.interrupt()
                     self.env.process(shovel.preventiveMaintenance(workshop))
@@ -181,7 +181,7 @@ class Truck(object):
                 # PREVENTIVE MAINTENANCE
                 shovel = self.assignment(shovels)
                 expTaskTime = self.estimateExpTaskTime(shovel)
-                if self.doPreventiveMaintenance(expTaskTime=expTaskTime):
+                if self.doPreventiveMaintenanceAgeBased(expTaskTime=expTaskTime):
                     self.env.statistics["Truck%d" % self.id]["PreventiveInterventions"] += 1
                     self.env.statistics["Truck%d" % self.id]["PreventiveMaintenanceHistory"].append([self.env.now, self.Cp])
                     # ASSIGN A WORKSHOP
@@ -325,6 +325,15 @@ class Truck(object):
 
         if pFailure > self.p: return True
         else: return False
+
+    def doPreventiveMaintenanceAgeBased(self, expTaskTime):
+        """
+        The function use the age of the truck to establish whether a truck must undergo preventive maintenance.
+        """
+        if self.env.now - self.lastMaintenance > self.p:
+            return True
+        else:
+            return False
 
     def timeToRepairCorrective(self):
         return random.lognormvariate(mu=self.muCorrective,sigma=self.sigmaCorrective)
@@ -541,6 +550,15 @@ class Shovel(Server):
 
         if pFailure > self.p: return True
         else: return False
+
+    def doPreventiveMaintenanceAgeBased(self, expTaskTime):
+        """
+        The function use the age of the truck to establish whether a truck must undergo preventive maintenance.
+        """
+        if self.env.now - self.lastMaintenance > self.p:
+            return True
+        else:
+            return False
 
     def preventiveMaintenance(self,workshop):
         """

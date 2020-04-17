@@ -2,9 +2,9 @@ from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
 from statistics import mean
-# import matplotlib.pyplot as plt
-# from tqdm import tqdm
-# from multiprocessing import Pool
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+from multiprocessing import Pool
 
 def std(param, time_parameters=None):
     """
@@ -252,24 +252,19 @@ def multiTest(nTrial,sim_time):
             nExceptions += 1
     print("There where %d exceptions." % nExceptions)
 
-def fitness(SIM_TIME,seed,thresholds):
-    """The function run a single instance of the simulation experiment with the given maintenance thresholds and returns the total cost of maintenance.
+def fitness(SIM_TIME, seed, thresholds):
+    """
+    The function run a single instance of the simulation experiment with the given maintenance thresholds and returns the total cost of maintenance.
     By returning the total cost of maintenane we are weighting more corrective interventions.
+    The function simulates a system with as many trucks and shovels as the length of the relative thresholds' arrays.
     Input parameters:
 
     :param int SIM_TIME: the value of the simulation horizon expressed in minutes
     :param int seed: a value for the seed. It is used to reproduce the experiment with the same results.
+    :param dict thresholds: a dictionary containing two arrays of thresholds, one for trucks the other for shovels.
     :return: the total cost of maintenance
     :rtype: int
 
-    * Number of maintenance interventions per each truck and shovel, subdivided in:
-
-        * preventive interventions
-        * corrective interventions
-
-    * Stockpiles levels in time
-
-    :rtype: dict
     """
     env = simpy.Environment()
     env.statistics = dict()
@@ -303,7 +298,7 @@ def fitness(SIM_TIME,seed,thresholds):
             Cp=shovelsData[i][11],
             p=thresholds['Shovels'][i],
             workshops=workshops)
-        for i in range(2)]
+        for i in range(len(thresholds['Shovels']))]
 
     # DUMPSITES DECLARATION
     with open("data/dumpsites_data.csv","r",newline="\n") as f:
@@ -333,7 +328,8 @@ def fitness(SIM_TIME,seed,thresholds):
         dumpsites=dumpsites,
         workshops=workshops,
         muCapacity=truckData[i][8],
-        sigmaCapacity=truckData[i][9]) for i in range(10)]
+        sigmaCapacity=truckData[i][9])
+        for i in range(len(thresholds['Trucks']))]
 
     if seed is not None:
         random.seed(seed)
@@ -366,12 +362,32 @@ def multiFitness(nTrial, SIM_TIME, thresholds):
         scores.append(fitness(SIM_TIME,seed=None,thresholds=thresholds))
     return mean(scores)
 
-def GA(initialPopSize,items):
+def GA(initialPopSize, items, simTime):
+    """
+    A genetic algorithm which aim is to optimize maintenance thresholds.
 
-    def generateIndividuals(popSize, nIndividuals):
+    :param int initialPopSize: the size of the initial population
+    :param int items: the total number of items present in the system
+    :param int simTime: the length of the simulation horizon in [minutes]
+    :return: a touple containing the dictionary with thresholds and the value of the average cost of the maintenance obtained using such thresholds
+    :rtype: touple
+
+    """
+
+
+    def generateIndividuals(popSize, nGenes):
+        """
+        Generate a population of new *nIndividuals*.
+
+        :param int popSize: the number of individuals in the population
+        :param int nGenes: the number of genes in each individuals
+        :return: the new population of size *popSize* as a list of lists
+        :rtype: list
+
+        """
         population = list()
         for individual in range(popSize):
-            population.append([random.random()/10 for _ in range(nIndividuals)])
+            population.append([random.random()*100 for _ in range(nGenes)])
         return population
 
     def wheelOfFortune(n, population, scores):
@@ -432,7 +448,8 @@ def GA(initialPopSize,items):
 
     for _ in tqdm(range(max_generations)):
 
-        data = [(10, 1e4, {"Shovels": ind[1][:2], "Trucks": ind[1][2:]}) for ind in enumerate(population)]
+        # Wrap parameters for the simulation
+        data = [(20, simTime, {"Shovels": ind[:2], "Trucks": ind[2:]}) for ind in population]
 
         with Pool() as p:
             scores = list(p.starmap(multiFitness, data))
@@ -466,7 +483,7 @@ def GA(initialPopSize,items):
     plt.legend(['Best', 'Average'])
     plt.show()
 
-    return population[0], scores[0]
+    return {"Shovels": population[0][:2], "Trucks": population[0][2:]}, scores[0]
 
 def mineMap(thresholds):
     """The function plots the position of sites within the mine."""
@@ -522,11 +539,10 @@ def mineMap(thresholds):
     plt.savefig("figures/mine_map.png")
 
 if __name__ == "__main__":
-    with open('param.json', 'r') as f:
+    with open('param_age.json', 'r') as f:
         param = json.load(f)
 
-    stats = std(param)
-    # print(stats['Shovel1']['Statistics'])
-    # with open('results.json', 'w') as f:
-    #     json.dump(stats, f)
+    best, score = GA(100, 12, 1e5)
 
+    with open("results.json", "w") as f:
+        json.dump(best, f)
