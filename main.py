@@ -374,7 +374,6 @@ def GA(initialPopSize, items, simTime):
 
     """
 
-
     def generateIndividuals(popSize, nGenes):
         """
         Generate a population of new *nIndividuals*.
@@ -387,7 +386,7 @@ def GA(initialPopSize, items, simTime):
         """
         population = list()
         for individual in range(popSize):
-            population.append([random.random()*100 for _ in range(nGenes)])
+            population.append([random.random()*200 for _ in range(nGenes)])
         return population
 
     def wheelOfFortune(n, population, scores):
@@ -441,7 +440,7 @@ def GA(initialPopSize, items, simTime):
             return x[:n]
 
     population = generateIndividuals(initialPopSize,items)
-    max_generations = 5
+    max_generations = 10
     stats = dict()
     stats['best'] = list()
     stats['average'] = list()
@@ -539,10 +538,11 @@ def mineMap(thresholds):
     plt.savefig("figures/mine_map.png")
 
 if __name__ == "__main__":
-    with open('param_age.json', 'r') as f:
-        param = json.load(f)
+    # with open('results.json', 'r') as f:
+    #     param = json.load(f)
+    # stats = std(param)
 
-    best, score = GA(100, 12, 1e5)
+    best, score = GA(50, 12, 1e5)
 
     with open("results.json", "w") as f:
         json.dump(best, f)
