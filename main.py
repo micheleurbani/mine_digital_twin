@@ -2,14 +2,17 @@ from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
 from statistics import mean
-import matplotlib.pyplot as plt
-from tqdm import tqdm
-from multiprocessing import Pool
+# import matplotlib.pyplot as plt
+# from tqdm import tqdm
+# from multiprocessing import Pool
 
 def std(param, time_parameters=None):
     """
     The function asks for a dictionary where we specify the parameters required by the simulation. Parameters are listed below:
 
+    - preventiveMaintenancePolicy: it can be one of the follwing values:
+        -- *condinal_probability* to use the conditional probability rule
+        -- *age_based* to use the age-based maintenance rule
     - nTrucks:        the number of trucks simulated
     - nShovels:       the number of shovels simulated
     - nDumpSites:     the number of dumpsites simulated
@@ -120,6 +123,10 @@ def std(param, time_parameters=None):
     except:
         pass
     begin = datetime.now()
+    # Stick the policy to the classes Shovel and Trucks
+    Shovel.preventiveMaintenanceRule = param['preventiveMaintenanceRule']
+    Truck.preventiveMaintenanceRule = param['preventiveMaintenanceRule']
+
     env.run(until=param["initialTime"] + param["simTime"])
     print('End')
     processingTime = datetime.now() - begin
@@ -538,11 +545,17 @@ def mineMap(thresholds):
     plt.savefig("figures/mine_map.png")
 
 if __name__ == "__main__":
-    # with open('results.json', 'r') as f:
-    #     param = json.load(f)
-    # stats = std(param)
+    with open('param.json', 'r') as f:
+        param = json.load(f)
+    with open('results_4000.json', 'r') as f:
+        thresholds = json.load(f)
+    param['shovelPolicy'] = thresholds['Shovels']
+    param['truckPolicy'] =  thresholds['Trucks']
+    param['nShovels'] = 2
+    param['preventiveMaintenanceRule'] = 'age_based'
+    stats = std(param)
 
-    best, score = GA(50, 12, 1e5)
+    # best, score = GA(50, 12, 1e5)
 
-    with open("results.json", "w") as f:
-        json.dump(best, f)
+    # with open("results.json", "w") as f:
+    #     json.dump(best, f)

@@ -191,11 +191,11 @@ class Truck(object):
                 shovel = self.assignment(shovels)
                 expTaskTime = self.estimateExpTaskTime(shovel)
 
-                if preventiveMaintenanceRule == 'condinal_probability':
+                if self.preventiveMaintenanceRule == 'condinal_probability':
                     doMaintenance = self.doPreventiveMaintenance(expTaskTime=expTaskTime)
-                elif preventiveMaintenanceRule == 'age_based':
+                elif self.preventiveMaintenanceRule == 'age_based':
                     doMaintenance = self.doPreventiveMaintenanceAgeBased(expTaskTime=expTaskTime)
-                elif Shovel.preventiveMaintenanceRule is None:
+                elif self.preventiveMaintenanceRule is None:
                     raise EnvironmentError
                 if doMaintenance:
                     self.env.statistics["Truck%d" % self.id]["PreventiveInterventions"] += 1
