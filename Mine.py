@@ -21,7 +21,10 @@ class Truck(object):
     :param list shovels: The list of shovels in the system
     :param list dumpsites: The list of dump sites in the system
     :param list workshops: The list of workshops in the system
+
     """
+
+    preventiveMaintenanceRule = None
 
     def __init__(
         self,
@@ -143,7 +146,13 @@ class Truck(object):
                 # CHECK SHOVEL FOR PREVENTIVE MAINTENANCE
                 workshop = shovel.assignment(workshops)
                 expTaskTime = shovel.distance(workshop.coordinates) + shovel.waitingTime()
-                if shovel.doPreventiveMaintenanceAgeBased(expTaskTime):
+                if Shovel.preventiveMaintenanceRule == 'condinal_probability':
+                    doMaintenance = self.doPreventiveMaintenance(expTaskTime=expTaskTime)
+                elif Shovel.preventiveMaintenanceRule == 'age_based':
+                    doMaintenance = self.doPreventiveMaintenanceAgeBased(expTaskTime=expTaskTime)
+                elif Shovel.preventiveMaintenanceRule is None:
+                    raise EnvironmentError
+                if doMaintenance:
                     # Interrupt failure process
                     shovel.failure.interrupt()
                     self.env.process(shovel.preventiveMaintenance(workshop))
@@ -181,7 +190,14 @@ class Truck(object):
                 # PREVENTIVE MAINTENANCE
                 shovel = self.assignment(shovels)
                 expTaskTime = self.estimateExpTaskTime(shovel)
-                if self.doPreventiveMaintenanceAgeBased(expTaskTime=expTaskTime):
+
+                if preventiveMaintenanceRule == 'condinal_probability':
+                    doMaintenance = self.doPreventiveMaintenance(expTaskTime=expTaskTime)
+                elif preventiveMaintenanceRule == 'age_based':
+                    doMaintenance = self.doPreventiveMaintenanceAgeBased(expTaskTime=expTaskTime)
+                elif Shovel.preventiveMaintenanceRule is None:
+                    raise EnvironmentError
+                if doMaintenance:
                     self.env.statistics["Truck%d" % self.id]["PreventiveInterventions"] += 1
                     self.env.statistics["Truck%d" % self.id]["PreventiveMaintenanceHistory"].append([self.env.now, self.Cp])
                     # ASSIGN A WORKSHOP
@@ -380,6 +396,8 @@ class Shovel(Server):
     :param list workshops: The list of workshops in the system
 
     """
+
+    preventiveMaintenanceRule = None
 
     def __init__(
         self,
