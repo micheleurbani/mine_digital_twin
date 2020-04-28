@@ -1,0 +1,8 @@
+=========
+Changelog
+=========
+
+28/04/2020 - Addition of PM rules
+=================================
+
+- The possibility to select a preventive maintenance rule between *age_based* and *condinal_probability* was added.

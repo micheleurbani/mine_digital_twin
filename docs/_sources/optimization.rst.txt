@@ -1,0 +1,25 @@
+============
+Optimization
+============
+
+The Mine Maintenance Simulator can be used to replicate O&M in a mine.
+Maintenance thresholds values can be usede to express decision maker preferences with respect the execution of preventive maintenance.
+In the following, the set of tools that are available for optimization of such thresholds is presented.
+
+Genetic Algorithm
+=================
+
+Genetic algorithm (GA) is a suboptimal tool to optimize maintenance thresholds, however it is way better than hand tuning of parameters.
+The main reason for low preferences of GA is the nature of the problem, wihch is stochastic.
+A GA usually expects that given the same set of variables, the fitness function will return only one value of the solution.
+With the mine simulator this is not the case because each run of the experiment produces different results.
+Since we are searching for maintenance threshold values that can perform well on average, the use of the seed for replication of a simulation instance is methodologically wrong.
+
+GA Documentation and Instructions for use
+-----------------------------------------
+
+The following is the documentation of the GA.
+
+.. autofunction:: main.GA
+
+To partly remedy the curse of stochastic optimiztion using GA, the fitness functoin was modified in order to return the average value of the maintenance cost over 20 runs of the simulation experiment.

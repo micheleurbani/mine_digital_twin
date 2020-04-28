@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Optimization &#8212; Mine Digital Twin 1.0.2 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Documentation of Mine.py" href="documentation.html" />
+    <link rel="prev" title="Logging and Statistics" href="logging.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="optimization">
+<h1>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h1>
+<p>The Mine Maintenance Simulator can be used to replicate O&amp;M in a mine.
+Maintenance thresholds values can be usede to express decision maker preferences with respect the execution of preventive maintenance.
+In the following, the set of tools that are available for optimization of such thresholds is presented.</p>
+<div class="section" id="genetic-algorithm">
+<h2>Genetic Algorithm<a class="headerlink" href="#genetic-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>Genetic algorithm (GA) is a suboptimal tool to optimize maintenance thresholds, however it is way better than hand tuning of parameters.
+The main reason for low preferences of GA is the nature of the problem, wihch is stochastic.
+A GA usually expects that given the same set of variables, the fitness function will return only one value of the solution.
+With the mine simulator this is not the case because each run of the experiment produces different results.
+Since we are searching for maintenance threshold values that can perform well on average, the use of the seed for replication of a simulation instance is methodologically wrong.</p>
+<div class="section" id="ga-documentation-and-instructions-for-use">
+<h3>GA Documentation and Instructions for use<a class="headerlink" href="#ga-documentation-and-instructions-for-use" title="Permalink to this headline">¶</a></h3>
+<p>The following is the documentation of the GA.</p>
+<dl class="function">
+<dt id="main.GA">
+<code class="sig-prename descclassname">main.</code><code class="sig-name descname">GA</code><span class="sig-paren">(</span><em class="sig-param">initialPopSize</em>, <em class="sig-param">items</em>, <em class="sig-param">simTime</em><span class="sig-paren">)</span><a class="headerlink" href="#main.GA" title="Permalink to this definition">¶</a></dt>
+<dd><p>A genetic algorithm which aim is to optimize maintenance thresholds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initialPopSize</strong> (<em>int</em>) – the size of the initial population</p></li>
+<li><p><strong>items</strong> (<em>int</em>) – the total number of items present in the system</p></li>
+<li><p><strong>simTime</strong> (<em>int</em>) – the length of the simulation horizon in [minutes]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a touple containing the dictionary with thresholds and the value of the average cost of the maintenance obtained using such thresholds</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>touple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>To partly remedy the curse of stochastic optimiztion using GA, the fitness functoin was modified in order to return the average value of the maintenance cost over 20 runs of the simulation experiment.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Mine Digital Twin</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="items_summary.html">Items Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging and Statistics</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Simulation Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="logging.html" title="previous chapter">Logging and Statistics</a></li>
+      <li>Next: <a href="documentation.html" title="next chapter">Documentation of Mine.py</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Michele Urbani.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/optimization.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
