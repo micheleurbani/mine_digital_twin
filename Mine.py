@@ -558,7 +558,7 @@ class Shovel(Server):
 
         .. math::
 
-            P(t < T < \\Delta t | T > t) > \    ext{threshold}
+            P(t < T < \\Delta t | T > t) > \\text{threshold}
 
         """
         def weibull(x):

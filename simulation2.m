@@ -23,7 +23,8 @@ param.nWorkShops = 2;
 
 param.initialTime = 0;       % The initial time of the simulation [minutes]
 param.simTime = 100000;      % Length of thesimulation [minutes]
-% param.seed = 42;           % A value for the seed
+param.seed = 42;             % A value for the seed
+param.preventiveMaintenanceRule = "age_based"
 
 % Encode the struct using JSON format
 json_format = jsonencode(param);

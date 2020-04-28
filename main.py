@@ -124,8 +124,8 @@ def std(param, time_parameters=None):
         pass
     begin = datetime.now()
     # Stick the policy to the classes Shovel and Trucks
-    Shovel.preventiveMaintenanceRule = param['preventiveMaintenanceRule']
-    Truck.preventiveMaintenanceRule = param['preventiveMaintenanceRule']
+    Shovel.preventiveMaintenanceRule = param['PMRule']
+    Truck.preventiveMaintenanceRule = param['PMRule']
 
     env.run(until=param["initialTime"] + param["simTime"])
     print('End')
@@ -552,7 +552,7 @@ if __name__ == "__main__":
     param['shovelPolicy'] = thresholds['Shovels']
     param['truckPolicy'] =  thresholds['Trucks']
     param['nShovels'] = 2
-    param['preventiveMaintenanceRule'] = 'age_based'
+    param['PMRule'] = 'age_based'
     stats = std(param)
 
     # best, score = GA(50, 12, 1e5)
