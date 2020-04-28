@@ -2,9 +2,9 @@ from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
 from statistics import mean
-# import matplotlib.pyplot as plt
-# from tqdm import tqdm
-# from multiprocessing import Pool
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+from multiprocessing import Pool
 
 def std(param, time_parameters=None):
     """
@@ -341,6 +341,10 @@ def fitness(SIM_TIME, seed, thresholds):
     if seed is not None:
         random.seed(seed)
     begin = datetime.now()
+    # Stick the policy to the classes Shovel and Trucks
+    Shovel.preventiveMaintenanceRule = param['PMRule']
+    Truck.preventiveMaintenanceRule = param['PMRule']
+
     env.run(until=SIM_TIME)
     if DEBUG:
         print('End')
@@ -393,7 +397,7 @@ def GA(initialPopSize, items, simTime):
         """
         population = list()
         for individual in range(popSize):
-            population.append([random.random()*200 for _ in range(nGenes)])
+            population.append([random.random()*3000 for _ in range(nGenes)])
         return population
 
     def wheelOfFortune(n, population, scores):
@@ -440,14 +444,16 @@ def GA(initialPopSize, items, simTime):
             for _ in range(n):
                 # Select a random individual from parents
                 y = parents[random.randint(0,len(parents)-1)]
-                # Select the mutation point
-                q = random.randint(0,len(y)-1)
-                y[q] += random.normalvariate(mu=0,sigma=0.001)
+                # Two-points mutation
+                for _ in range(2):
+                    # Select the mutation point
+                    q = random.randint(0,len(y)-1)
+                    y[q] += random.normalvariate(mu=0,sigma=0.1)
                 x.append(y)
             return x[:n]
 
     population = generateIndividuals(initialPopSize,items)
-    max_generations = 10
+    max_generations = 100
     stats = dict()
     stats['best'] = list()
     stats['average'] = list()
@@ -455,9 +461,9 @@ def GA(initialPopSize, items, simTime):
     for _ in tqdm(range(max_generations)):
 
         # Wrap parameters for the simulation
-        data = [(20, simTime, {"Shovels": ind[:2], "Trucks": ind[2:]}) for ind in population]
+        data = [(20, simTime, {"Shovels": ind[:3], "Trucks": ind[3:]}) for ind in population]
 
-        with Pool() as p:
+        with Pool(processes=60) as p:
             scores = list(p.starmap(multiFitness, data))
 
         # Selection of parents
@@ -476,7 +482,7 @@ def GA(initialPopSize, items, simTime):
         stats['best'].append(scores[0])
         stats['average'].append(mean(scores))
         # New population
-        population = crossovered + mutated + list(population[:10]) + generateIndividuals(30,items)
+        population = crossovered + mutated + list(population[:10])
 
     stats['thresholds'] = population[0]
     stats['score'] = scores[0]
@@ -545,17 +551,17 @@ def mineMap(thresholds):
     plt.savefig("figures/mine_map.png")
 
 if __name__ == "__main__":
-    with open('param.json', 'r') as f:
-        param = json.load(f)
-    with open('results_4000.json', 'r') as f:
-        thresholds = json.load(f)
-    param['shovelPolicy'] = thresholds['Shovels']
-    param['truckPolicy'] =  thresholds['Trucks']
-    param['nShovels'] = 2
-    param['PMRule'] = 'age_based'
-    stats = std(param)
+    # with open('param.json', 'r') as f:
+    #     param = json.load(f)
+    # with open('results_4000.json', 'r') as f:
+    #     thresholds = json.load(f)
+    # param['shovelPolicy'] = thresholds['Shovels']
+    # param['truckPolicy'] =  thresholds['Trucks']
+    # param['nShovels'] = 2
+    # param['PMRule'] = 'age_based'
+    # stats = std(param)
 
-    # best, score = GA(50, 12, 1e5)
+    best, score = GA(70, 13, 2*1e5)
 
     # with open("results.json", "w") as f:
     #     json.dump(best, f)
