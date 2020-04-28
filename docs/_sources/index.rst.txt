@@ -6,7 +6,7 @@ Welcome to Mine Maintenance Simulator documentation!
 ====================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    Introduction <introduction>
@@ -14,7 +14,9 @@ Welcome to Mine Maintenance Simulator documentation!
    Items Summary <items_summary>
    Workflows <workflows>
    Logging and Statistics <logging>
+   Simulation Optimization <optimization>
    Documentation <documentation>
+   Changelog <changelog>
 
 Indices and tables
 ==================

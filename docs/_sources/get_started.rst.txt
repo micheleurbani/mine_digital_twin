@@ -54,6 +54,8 @@ It is possible to specify the following parameters:
 +------------+----------+-------------------------------------------------------------------------------------------------------------------+
 |seed        |int       |An arbitrary value to allow replication of the experiment. If it is left blank, a random value will be assigned.   |
 +------------+----------+-------------------------------------------------------------------------------------------------------------------+
+|PMRule      |str       |The name of the policy used to decide whether to perform preventive maintenance.                                   |
++------------+----------+-------------------------------------------------------------------------------------------------------------------+
 
 An example of parameter declaration is the following.
 
@@ -73,6 +75,7 @@ An example of parameter declaration is the following.
     param.nTrucks = length(param.truckPolicy);
     param.nDumpSites = 2;
     param.nWorkShops = 2;
+    param.PMRule = "age_based"
 
     param.simTime = 100000;     % Length of thesimulation [minutes]
     param.seed = 42;            % A value for the seed

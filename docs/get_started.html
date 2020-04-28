@@ -105,6 +105,10 @@ It is possible to specify the following parameters:</p>
 <td><p>int</p></td>
 <td><p>An arbitrary value to allow replication of the experiment. If it is left blank, a random value will be assigned.</p></td>
 </tr>
+<tr class="row-even"><td><p>PMRule</p></td>
+<td><p>str</p></td>
+<td><p>The name of the policy used to decide whether to perform preventive maintenance.</p></td>
+</tr>
 </tbody>
 </table>
 <p>An example of parameter declaration is the following.</p>
@@ -120,6 +124,7 @@ It is possible to specify the following parameters:</p>
 <span class="n">param</span><span class="p">.</span><span class="n">nTrucks</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">truckPolicy</span><span class="p">);</span>
 <span class="n">param</span><span class="p">.</span><span class="n">nDumpSites</span> <span class="p">=</span> <span class="mi">2</span><span class="p">;</span>
 <span class="n">param</span><span class="p">.</span><span class="n">nWorkShops</span> <span class="p">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="n">param</span><span class="p">.</span><span class="n">PMRule</span> <span class="p">=</span> <span class="s">&quot;age_based&quot;</span>
 
 <span class="n">param</span><span class="p">.</span><span class="n">simTime</span> <span class="p">=</span> <span class="mi">100000</span><span class="p">;</span>     <span class="c">% Length of thesimulation [minutes]</span>
 <span class="n">param</span><span class="p">.</span><span class="n">seed</span> <span class="p">=</span> <span class="mi">42</span><span class="p">;</span>            <span class="c">% A value for the seed</span>
@@ -197,15 +202,13 @@ String casting is performed using the function <em>string()</em> and decoding is
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#python-setup">Python Setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#matlab-interface">MatLab Interface</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Get Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="items_summary.html">Items Summary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging and Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimization.html">Simulation Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
 <div class="relations">
