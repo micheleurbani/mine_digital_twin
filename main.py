@@ -342,8 +342,8 @@ def fitness(SIM_TIME, seed, thresholds):
         random.seed(seed)
     begin = datetime.now()
     # Stick the policy to the classes Shovel and Trucks
-    Shovel.preventiveMaintenanceRule = param['PMRule']
-    Truck.preventiveMaintenanceRule = param['PMRule']
+    Shovel.preventiveMaintenanceRule = 'age_based'
+    Truck.preventiveMaintenanceRule = 'age_based'
 
     env.run(until=SIM_TIME)
     if DEBUG:
