@@ -5,5 +5,4 @@ desktop.ini
 .vscode/
 Documentation.Ink
 documentation/
-results.json
-param.json
+results/
