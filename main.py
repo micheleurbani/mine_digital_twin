@@ -553,15 +553,15 @@ def mineMap(thresholds):
 if __name__ == "__main__":
     # with open('param.json', 'r') as f:
     #     param = json.load(f)
-    # with open('results_4000.json', 'r') as f:
+    # with open('results2.json', 'r') as f:
     #     thresholds = json.load(f)
-    # param['shovelPolicy'] = thresholds['Shovels']
-    # param['truckPolicy'] =  thresholds['Trucks']
-    # param['nShovels'] = 2
-    # param['PMRule'] = 'age_based'
+    # param['shovelPolicy'] = thresholds['shovels']
+    # param['truckPolicy'] =  thresholds['trucks']
+
     # stats = std(param)
 
-    best, score = GA(70, 13, 2*1e5)
+    # best, score = GA(70, 13, 2*1e5)
 
     # with open("results.json", "w") as f:
     #     json.dump(best, f)
+    pass
