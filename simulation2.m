@@ -11,9 +11,9 @@ end
 % Create a struct variable where to store simulation parameters
 param = struct();
 % Declare shovel policy
-param.shovelPolicy = [2734.068605783732, 2815.3895288778315, 3340.1960412906346];
+param.shovelPolicy = [2734.068, 2815.389, 3340.196];
 % Declare truck policy
-param.truckPolicy = [1122.0169782455648, 2795.403826898272, 627.217982556582, 2434.159259419229, 1835.745594687327, 1060.45888178791171, 662.4863635451953, 1010.80833154114735, 659.9638825046144, 2813.5131572589385];
+param.truckPolicy = [1122.016, 2795.403, 627.217, 2434.159, 1835.745, 1060.458, 662.486, 1010.808, 659.963, 2813.513];
 
 % Specify how many items are present in the mine
 param.nShovels = length(param.shovelPolicy);
