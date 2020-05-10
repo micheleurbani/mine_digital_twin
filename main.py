@@ -576,9 +576,20 @@ def change_configuration(nshovels, ntrucks, param):
     attempt_param['nTrucks'] = ntrucks
     return attempt_param
 
-def optimize_configuration(target, n, param, time_parameters=None):
-    shovels_lb, shovels_ub = 1, 3
-    trucks_lb, trucks_ub = 1, 10
+def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_parameters=None):
+    """
+    The function search for the configuration that, using the minimum amount of trucks and shovels, satisfies with the 95% of probability the production target.
+
+    :param float target: the production target in hundreds of kilograms
+    :param int n: the number of runs used to perform the 95% probability test
+    :param dict param: the dictionary containing the parameters to run the simulation (maintenance thresholds, simulation horizon, etc.)
+    :param int shovels_ub: the maximum number of shovels allowed
+    :param int trucks_ub: the maximum number of trucks allowed
+    :return: a tuple containing the minimum number of trucks and shovels that guarantees to reach the target throughput with 95% probability
+    :rtype: tuple
+
+    """
+    shovels_lb, trucks_lb = 1, 1
     nshovels = min([shovels_lb, shovels_ub])
     ntrucks = max([trucks_lb, trucks_ub])
 
@@ -587,7 +598,6 @@ def optimize_configuration(target, n, param, time_parameters=None):
 
     attempt_param = change_configuration(nshovels, ntrucks, param)
     # Estimate the production output for the initial configuration.
-    n = 10
     guaranteed_output = calculate_output(n, attempt_param)
     print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
     i += 1
@@ -618,6 +628,8 @@ def optimize_configuration(target, n, param, time_parameters=None):
 
         print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
         i += 1
+
+    return ntrucks, nshovels
 
 
 if __name__ == "__main__":
