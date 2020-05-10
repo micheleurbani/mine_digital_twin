@@ -2,11 +2,12 @@ from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
 from statistics import mean
-# import matplotlib.pyplot as plt
-# from tqdm import tqdm
-# from multiprocessing import Pool
+import numpy as np
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+from multiprocessing import Pool
 
-def std(param, time_parameters=None):
+def std(param, time_parameters=None, output=True):
     """
     The function asks for a dictionary where we specify the parameters required by the simulation. Parameters are listed below:
 
@@ -128,20 +129,24 @@ def std(param, time_parameters=None):
     Truck.preventiveMaintenanceRule = param['PMRule']
 
     env.run(until=param["initialTime"] + param["simTime"])
-    print('End')
+    if output:
+        print('End')
     processingTime = datetime.now() - begin
-    print("Processing time ", processingTime)
+    if output:
+        print("Processing time ", processingTime)
     time_parameters = dict()
     # Results and statistics update
     for i in range(len(trucks)):
-        print("Truck%d: \tFailures =" %i, env.statistics["Truck%d" %i]["Failure"], "\t Preventive =", env.statistics["Truck%d" %i]["PreventiveInterventions"])
+        if output:
+            print("Truck%d: \tFailures =" %i, env.statistics["Truck%d" %i]["Failure"], "\t Preventive =", env.statistics["Truck%d" %i]["PreventiveInterventions"])
         s = env.statistics["Truck%d"%i]["Statistics"]
         s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"]) / (param["simTime"])
         time_parameters["Truck%d"%i] = dict()
         time_parameters["Truck%d"%i]["LastMaintenance"] = trucks[i].lastMaintenance
         time_parameters["Truck%d"%i]["NextFault"] = trucks[i].nextFault
     for i in range(len(shovels)):
-        print("Shovel%d:\tFailures =" %i, env.statistics["Shovel%d" %i]["Failure"], "\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
+        if output:
+            print("Shovel%d:\tFailures =" %i, env.statistics["Shovel%d" %i]["Failure"], "\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
         s = env.statistics["Shovel%d"%i]["Statistics"]
         s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"] + s['TravelTime']) / (param["simTime"])
         s["IdleTime"] = param["simTime"] - s["WorkingTime"] - s["TravelTime"] - s["TimeInQueue"] - s["Failed"] - s["PMRepair"] - s["CMRepair"]
@@ -149,8 +154,8 @@ def std(param, time_parameters=None):
         time_parameters["Shovel%d"%i]["LastMaintenance"] = shovels[i].lastMaintenance
         time_parameters["Shovel%d"%i]["NextFault"] = shovels[i].nextFault
 
-    # return env.statistics
-    return json.dumps(env.statistics), json.dumps(time_parameters)
+    return env.statistics
+    # return json.dumps(env.statistics), json.dumps(time_parameters)
 
 def test(SIM_TIME,seed):
     """The function run a single instance of the simulation experiment.
@@ -550,18 +555,84 @@ def mineMap(thresholds):
     plt.legend()
     plt.savefig("figures/mine_map.png")
 
-if __name__ == "__main__":
-    # with open('param.json', 'r') as f:
-    #     param = json.load(f)
-    # with open('results2.json', 'r') as f:
-    #     thresholds = json.load(f)
-    # param['shovelPolicy'] = thresholds['shovels']
-    # param['truckPolicy'] =  thresholds['trucks']
+def output_amount(param, time_parameters=None):
+        results = std(param, time_parameters=time_parameters, output=False)
+        throughput = 0
+        for i in range(2):
+            if len(results['DumpSite%d'%i]) > 0:
+                throughput += np.sum(np.array(results['DumpSite%d'%i])[:,-1],0)
+        return throughput
 
-    # stats = std(param)
+def calculate_output(n, attempt_param, time_parameters=None):
+    with Pool() as p:
+        production_outputs = list(p.starmap(output_amount, [(attempt_param,) for _ in range(n)]))
+    return np.percentile(production_outputs, 95)
+
+def change_configuration(nshovels, ntrucks, param):
+    attempt_param = dict(param)
+    attempt_param['shovelPolicy'] = param['shovelPolicy'][:nshovels]
+    attempt_param['nShovels'] = nshovels
+    attempt_param['truckPolicy'] = param['truckPolicy'][:ntrucks]
+    attempt_param['nTrucks'] = ntrucks
+    return attempt_param
+
+def optimize_configuration(target, n, param, time_parameters=None):
+    shovels_lb, shovels_ub = 1, 3
+    trucks_lb, trucks_ub = 1, 10
+    nshovels = min([shovels_lb, shovels_ub])
+    ntrucks = max([trucks_lb, trucks_ub])
+
+    test_shovels, test = False, False
+    i = 0
+
+    attempt_param = change_configuration(nshovels, ntrucks, param)
+    # Estimate the production output for the initial configuration.
+    n = 10
+    guaranteed_output = calculate_output(n, attempt_param)
+    print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
+    i += 1
+
+    while not test:
+        if not test_shovels:
+            if nshovels + 1 <= shovels_ub: nshovels += 1
+            else: test_shovels = True
+            attempt_param = change_configuration(nshovels, ntrucks, param)
+            guaranteed_output = calculate_output(n, attempt_param)
+            if guaranteed_output > target:
+                test_shovels = True
+        elif test_shovels:
+            if guaranteed_output < target:
+                if ntrucks + 1 > trucks_ub:
+                    print(f"Impossible to reach the target with {shovels_ub} shovels and {trucks_ub} trucks.")
+                    break
+                else:
+                    ntrucks += 1
+                    attempt_param = change_configuration(nshovels, ntrucks, param)
+                    guaranteed_output = calculate_output(n, attempt_param)
+                    test = True
+            elif guaranteed_output > target:
+                if ntrucks - 1 >= trucks_lb:
+                    ntrucks -= 1
+                    attempt_param = change_configuration(nshovels, ntrucks, param)
+                    guaranteed_output = calculate_output(n, attempt_param)
+
+        print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
+        i += 1
+
+
+if __name__ == "__main__":
+    with open('param.json', 'r') as f:
+        param = json.load(f)
+    with open('results2.json', 'r') as f:
+        thresholds = json.load(f)
+    param['shovelPolicy'] = thresholds['shovels']
+    param['truckPolicy'] =  thresholds['trucks']
+    param['seed'] = []
+
+    optimize_configuration(4*1e6, 10, param)
 
     # best, score = GA(70, 13, 2*1e5)
 
     # with open("results.json", "w") as f:
     #     json.dump(best, f)
-    pass
+    # pass
