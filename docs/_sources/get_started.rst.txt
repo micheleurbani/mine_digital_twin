@@ -5,14 +5,14 @@ Get Started
 Python Setup
 ============
 
-As far as I tested, no installation of Python on the user OS should be necessary. A Python virtualenvironment is already present in the local folder `venv` with all the packages required to run the simulation.
+As far as I tested, no installation of Python on the user OS should be necessary. A Python virtualenvironment is already present in the local folder  ``venv`` with all the packages required to run the simulation.
 
 MatLab Interface
 ================
 
 The integration between MatLab and Python was subject to major updates starting from MatLab 2019a, therefore it is warmly suggested to use MatLab 2019a or later.
 The first thing to do when we want to call Python scripts from MatLab is to clear the workspace from old variables and to specify the virtual environment we want to work with.
-It is possible to specify the Python interpreter only once per MatLab session, i.e. when you run your script a second time MatLab will raise an error unless you comment the function *pyenv()* or, better, you use the following snippet, which automatically detects the presence of a Python interpreter.
+It is possible to specify the Python interpreter only once per MatLab session, i.e. when you run your script a second time MatLab will raise an error unless you comment the function ``pyenv()`` or, better, you use the following snippet, which automatically detects the presence of a Python interpreter.
 Due to this hallmark of MatLab, whenever you modify a Python script that you want to use in MatLab, it is required to restart MatLab.
 
 .. highlight:: matlab
@@ -32,7 +32,7 @@ Due to this hallmark of MatLab, whenever you modify a Python script that you wan
 Declaration of Simulation Parameters
 ------------------------------------
 
-Simulation paramters are specified using a MatLab *struct* data type.
+Simulation paramters are specified using a MatLab ``struct`` data type.
 It is possible to specify the following parameters:
 
 +------------+----------+-------------------------------------------------------------------------------------------------------------------+
@@ -83,7 +83,7 @@ An example of parameter declaration is the following.
 Run a Simulation Experiment
 ---------------------------
 
-Before to run a simulation we need to convert the variable *param* to JSON format.
+Before to run a simulation we need to convert the variable ``param`` to JSON format.
 This step allows to simplify the communication between MatLab and Python, which othrewise would require to convert MatLab data types to Python data types.
 Since the values that are passed to Python are only integer and float types, they can be easily read by Python.
 
@@ -105,11 +105,11 @@ Since the values that are passed to Python are only integer and float types, the
     fwrite(fid, json_format, "char");
     fclose(fid);
 
-The simulation is finally run by calling the function *std* from the module *main.py*.
+The simulation is finally run by calling the function ``std`` from the module ``main.py``.
 The output of the function is a Python tuple containing the results of the experiment and the parameters required to restart the simulation, both in a JSON format.
-The tuple must be casted into a MatLab cell array using the function *cell()*.
+The tuple must be casted into a MatLab cell array using the function ``cell()``.
 Each of the fields of the cell contains a Python string, which in turn must be converted in a MatLab string and subsequently decoded by MatLab.
-String casting is performed using the function *string()* and decoding is performed using *jsondecode()*.
+String casting is performed using the function ``string()` and decoding is performed using ``jsondecode()``.
 
 .. highlight:: matlab
 
@@ -135,10 +135,44 @@ You can change some parameters, e.g. maintenance thresholds, and restart the exp
     % For the new run of the experiment the status of the items has to be provided
     output = py.main.std(param, items_status);
 
+Optimization of Mine Configuration
+----------------------------------
+
+The number of resources that are required to operate in order to obtain a given production target can be optimized.
+In the following it is showed how to do.
+
+.. highlight:: matlab
+
+::
+
+    % We can optimize the number of truck and shovels that are required to
+    % reach a production target
+    production_target = 3*1e6;  % [kg]
+    n = 10;                     % test each configuration n times
+    result_tuple = cell(py.main.optimize_configuration(production_target, n, param));
+
+After the optimization procedure run, the configuration of the system can be changed.
+
+.. note::
+
+    The results of the optimization are saved in a MatLab cell and the content of each cell must be converted to a MatLab data type using the function ``double()``.
+
+An example of data type conversion and change of the system configuration is showed in the following.
+
+.. highlight:: matlab
+
+::
+
+    % Change the number of trucks and shovels using the values found by the
+    % optimization procedure
+    param.truckPolicy = param.truckPolicy(1:double(result_tuple{1}));
+    param.shovelPolicy = param.shovelPolicy(1:double(result_tuple{2}));
+    param.nShovels = length(param.shovelPolicy);
+    param.nTrucks = length(param.truckPolicy);
 
 Results Extraction
 ------------------
 
-Results and statistics are contained in the variable *results* and can be extracted by accessing its attributes..
+Results and statistics are contained in the variable ``results`` and can be extracted by accessing its attributes..
 
 The meaning of the statistics enclosed in the output variables is explained in the Section :doc:`Logging and Statistics<./logging>`.

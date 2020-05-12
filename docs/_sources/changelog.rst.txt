@@ -2,6 +2,11 @@
 Changelog
 =========
 
+12/05/2020 - Addition of PM rules
+=================================
+- Fixed bug on preventive maintenance for shovels.
+- Added procedure for optimization of resources w.r.t a production target.
+
 28/04/2020 - Addition of PM rules
 =================================
 

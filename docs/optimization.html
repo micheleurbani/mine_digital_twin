@@ -36,17 +36,60 @@
   <div class="section" id="optimization">
 <h1>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h1>
 <p>The Mine Maintenance Simulator can be used to replicate O&amp;M in a mine.
-Maintenance thresholds values can be usede to express decision maker preferences with respect the execution of preventive maintenance.
+Explanation of the (simulation) optimization procedures provided within the package is provided in the following.
+All the function that are mentioned below can be imported from the module <code class="docutils literal notranslate"><span class="pre">main.py</span></code>.</p>
+<div class="section" id="optimization-of-mine-configuration">
+<h2>Optimization of Mine Configuration<a class="headerlink" href="#optimization-of-mine-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The number of trucks and shovels that are operating in the mine can be optimized with respect to the taget production throughput.
+The function <code class="docutils literal notranslate"><span class="pre">optimize_configuration</span></code> provides this functionality; the function returns the number of trucks and shovels that guarantees to reach the target with the 95% of probability.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The function still presents a drawback: Since the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> module is used, some windows are opened and closed during the execution of the functoin. In practice it is not possible to work on other tasks while the function is running.</p>
+</div>
+<p>The documentation is reported in the following:</p>
+<dl class="function">
+<dt id="main.optimize_configuration">
+<code class="sig-prename descclassname">main.</code><code class="sig-name descname">optimize_configuration</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">n</em>, <em class="sig-param">param</em>, <em class="sig-param">shovels_ub=3</em>, <em class="sig-param">trucks_ub=10</em>, <em class="sig-param">time_parameters=None</em><span class="sig-paren">)</span><a class="headerlink" href="#main.optimize_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function search for the configuration that, using the minimum amount of trucks and shovels, satisfies with the 95% of probability the production target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>float</em>) – the production target in hundreds of kilograms</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – the number of runs used to perform the 95% probability test</p></li>
+<li><p><strong>param</strong> (<em>dict</em>) – the dictionary containing the parameters to run the simulation (maintenance thresholds, simulation horizon, etc.)</p></li>
+<li><p><strong>shovels_ub</strong> (<em>int</em>) – the maximum number of shovels allowed, by default is set equal to three</p></li>
+<li><p><strong>trucks_ub</strong> (<em>int</em>) – the maximum number of trucks allowed, by default is set equal to ten</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a tuple containing the minimum number of trucks and shovels that guarantees to reach the target throughput with 95% probability</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="section" id="resources-optimization-in-detail">
+<h3>Resources Optimization in Detail<a class="headerlink" href="#resources-optimization-in-detail" title="Permalink to this headline">¶</a></h3>
+<p>The optimization procedure start testing the system usign the minimum amount of shovels and the maximum amount of trucks that are avilable.
+The 95-th percentile of the throughput distribution is calculated and it is tested against the production target; if the test is negative, the number of shovels is increased of one and the test is repeated, else the procedure start to optimize the number of trucks.
+The latter is decreased of one and the 95-th percentile is tested against the production target; in case the resulting througput is greater than the target a configuration with one truck less is tested, otherwise the optimal number of trucks is returned.</p>
+</div>
+</div>
+<div class="section" id="optimization-of-pm-thresholds">
+<h2>Optimization of PM thresholds<a class="headerlink" href="#optimization-of-pm-thresholds" title="Permalink to this headline">¶</a></h2>
+<p>Maintenance thresholds values can be usede to express decision maker preferences with respect the execution of preventive maintenance.
 In the following, the set of tools that are available for optimization of such thresholds is presented.</p>
 <div class="section" id="genetic-algorithm">
-<h2>Genetic Algorithm<a class="headerlink" href="#genetic-algorithm" title="Permalink to this headline">¶</a></h2>
+<h3>Genetic Algorithm<a class="headerlink" href="#genetic-algorithm" title="Permalink to this headline">¶</a></h3>
 <p>Genetic algorithm (GA) is a suboptimal tool to optimize maintenance thresholds, however it is way better than hand tuning of parameters.
 The main reason for low preferences of GA is the nature of the problem, wihch is stochastic.
 A GA usually expects that given the same set of variables, the fitness function will return only one value of the solution.
 With the mine simulator this is not the case because each run of the experiment produces different results.
 Since we are searching for maintenance threshold values that can perform well on average, the use of the seed for replication of a simulation instance is methodologically wrong.</p>
 <div class="section" id="ga-documentation-and-instructions-for-use">
-<h3>GA Documentation and Instructions for use<a class="headerlink" href="#ga-documentation-and-instructions-for-use" title="Permalink to this headline">¶</a></h3>
+<h4>GA Documentation and Instructions for use<a class="headerlink" href="#ga-documentation-and-instructions-for-use" title="Permalink to this headline">¶</a></h4>
 <p>The following is the documentation of the GA.</p>
 <dl class="function">
 <dt id="main.GA">
@@ -70,6 +113,7 @@ Since we are searching for maintenance threshold values that can perform well on
 </dd></dl>
 
 <p>To partly remedy the curse of stochastic optimiztion using GA, the fitness functoin was modified in order to return the average value of the maintenance cost over 20 runs of the simulation experiment.</p>
+</div>
 </div>
 </div>
 </div>

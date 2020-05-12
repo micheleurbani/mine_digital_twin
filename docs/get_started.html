@@ -37,13 +37,13 @@
 <h1>Get Started<a class="headerlink" href="#get-started" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="python-setup">
 <h2>Python Setup<a class="headerlink" href="#python-setup" title="Permalink to this headline">¶</a></h2>
-<p>As far as I tested, no installation of Python on the user OS should be necessary. A Python virtualenvironment is already present in the local folder <cite>venv</cite> with all the packages required to run the simulation.</p>
+<p>As far as I tested, no installation of Python on the user OS should be necessary. A Python virtualenvironment is already present in the local folder  <code class="docutils literal notranslate"><span class="pre">venv</span></code> with all the packages required to run the simulation.</p>
 </div>
 <div class="section" id="matlab-interface">
 <h2>MatLab Interface<a class="headerlink" href="#matlab-interface" title="Permalink to this headline">¶</a></h2>
 <p>The integration between MatLab and Python was subject to major updates starting from MatLab 2019a, therefore it is warmly suggested to use MatLab 2019a or later.
 The first thing to do when we want to call Python scripts from MatLab is to clear the workspace from old variables and to specify the virtual environment we want to work with.
-It is possible to specify the Python interpreter only once per MatLab session, i.e. when you run your script a second time MatLab will raise an error unless you comment the function <em>pyenv()</em> or, better, you use the following snippet, which automatically detects the presence of a Python interpreter.
+It is possible to specify the Python interpreter only once per MatLab session, i.e. when you run your script a second time MatLab will raise an error unless you comment the function <code class="docutils literal notranslate"><span class="pre">pyenv()</span></code> or, better, you use the following snippet, which automatically detects the presence of a Python interpreter.
 Due to this hallmark of MatLab, whenever you modify a Python script that you want to use in MatLab, it is required to restart MatLab.</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">clear</span><span class="p">;</span> <span class="n">close</span> <span class="s">all</span><span class="p">;</span> <span class="n">clc</span><span class="p">;</span>
 
@@ -58,7 +58,7 @@ Due to this hallmark of MatLab, whenever you modify a Python script that you wan
 </div>
 <div class="section" id="declaration-of-simulation-parameters">
 <h3>Declaration of Simulation Parameters<a class="headerlink" href="#declaration-of-simulation-parameters" title="Permalink to this headline">¶</a></h3>
-<p>Simulation paramters are specified using a MatLab <em>struct</em> data type.
+<p>Simulation paramters are specified using a MatLab <code class="docutils literal notranslate"><span class="pre">struct</span></code> data type.
 It is possible to specify the following parameters:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -133,7 +133,7 @@ It is possible to specify the following parameters:</p>
 </div>
 <div class="section" id="run-a-simulation-experiment">
 <h3>Run a Simulation Experiment<a class="headerlink" href="#run-a-simulation-experiment" title="Permalink to this headline">¶</a></h3>
-<p>Before to run a simulation we need to convert the variable <em>param</em> to JSON format.
+<p>Before to run a simulation we need to convert the variable <code class="docutils literal notranslate"><span class="pre">param</span></code> to JSON format.
 This step allows to simplify the communication between MatLab and Python, which othrewise would require to convert MatLab data types to Python data types.
 Since the values that are passed to Python are only integer and float types, they can be easily read by Python.</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Encode the struct using JSON format</span>
@@ -151,11 +151,11 @@ Since the values that are passed to Python are only integer and float types, the
 <span class="n">fclose</span><span class="p">(</span><span class="n">fid</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>The simulation is finally run by calling the function <em>std</em> from the module <em>main.py</em>.
+<p>The simulation is finally run by calling the function <code class="docutils literal notranslate"><span class="pre">std</span></code> from the module <code class="docutils literal notranslate"><span class="pre">main.py</span></code>.
 The output of the function is a Python tuple containing the results of the experiment and the parameters required to restart the simulation, both in a JSON format.
-The tuple must be casted into a MatLab cell array using the function <em>cell()</em>.
+The tuple must be casted into a MatLab cell array using the function <code class="docutils literal notranslate"><span class="pre">cell()</span></code>.
 Each of the fields of the cell contains a Python string, which in turn must be converted in a MatLab string and subsequently decoded by MatLab.
-String casting is performed using the function <em>string()</em> and decoding is performed using <em>jsondecode()</em>.</p>
+String casting is performed using the function <code class="docutils literal notranslate"><span class="pre">string()`</span> <span class="pre">and</span> <span class="pre">decoding</span> <span class="pre">is</span> <span class="pre">performed</span> <span class="pre">using</span> <span class="pre">``jsondecode()</span></code>.</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">output</span> <span class="p">=</span> <span class="n">cell</span><span class="p">(</span><span class="n">py</span><span class="p">.</span><span class="n">main</span><span class="p">.</span><span class="n">std</span><span class="p">(</span><span class="n">param</span><span class="p">));</span>
 
 <span class="n">experiment_results</span> <span class="p">=</span> <span class="n">jsondecode</span><span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="n">output</span><span class="p">{</span><span class="mi">1</span><span class="p">}));</span>
@@ -174,9 +174,35 @@ String casting is performed using the function <em>string()</em> and decoding is
 </pre></div>
 </div>
 </div>
+<div class="section" id="optimization-of-mine-configuration">
+<h3>Optimization of Mine Configuration<a class="headerlink" href="#optimization-of-mine-configuration" title="Permalink to this headline">¶</a></h3>
+<p>The number of resources that are required to operate in order to obtain a given production target can be optimized.
+In the following it is showed how to do.</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% We can optimize the number of truck and shovels that are required to</span>
+<span class="c">% reach a production target</span>
+<span class="n">production_target</span> <span class="p">=</span> <span class="mi">3</span><span class="o">*</span><span class="mf">1e6</span><span class="p">;</span>  <span class="c">% [kg]</span>
+<span class="n">n</span> <span class="p">=</span> <span class="mi">10</span><span class="p">;</span>                     <span class="c">% test each configuration n times</span>
+<span class="n">result_tuple</span> <span class="p">=</span> <span class="n">cell</span><span class="p">(</span><span class="n">py</span><span class="p">.</span><span class="n">main</span><span class="p">.</span><span class="n">optimize_configuration</span><span class="p">(</span><span class="n">production_target</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">param</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>After the optimization procedure run, the configuration of the system can be changed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The results of the optimization are saved in a MatLab cell and the content of each cell must be converted to a MatLab data type using the function <code class="docutils literal notranslate"><span class="pre">double()</span></code>.</p>
+</div>
+<p>An example of data type conversion and change of the system configuration is showed in the following.</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Change the number of trucks and shovels using the values found by the</span>
+<span class="c">% optimization procedure</span>
+<span class="n">param</span><span class="p">.</span><span class="n">truckPolicy</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">truckPolicy</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">double</span><span class="p">(</span><span class="n">result_tuple</span><span class="p">{</span><span class="mi">1</span><span class="p">}));</span>
+<span class="n">param</span><span class="p">.</span><span class="n">shovelPolicy</span> <span class="p">=</span> <span class="n">param</span><span class="p">.</span><span class="n">shovelPolicy</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">double</span><span class="p">(</span><span class="n">result_tuple</span><span class="p">{</span><span class="mi">2</span><span class="p">}));</span>
+<span class="n">param</span><span class="p">.</span><span class="n">nShovels</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">shovelPolicy</span><span class="p">);</span>
+<span class="n">param</span><span class="p">.</span><span class="n">nTrucks</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">param</span><span class="p">.</span><span class="n">truckPolicy</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="results-extraction">
 <h3>Results Extraction<a class="headerlink" href="#results-extraction" title="Permalink to this headline">¶</a></h3>
-<p>Results and statistics are contained in the variable <em>results</em> and can be extracted by accessing its attributes..</p>
+<p>Results and statistics are contained in the variable <code class="docutils literal notranslate"><span class="pre">results</span></code> and can be extracted by accessing its attributes..</p>
 <p>The meaning of the statistics enclosed in the output variables is explained in the Section <a class="reference internal" href="logging.html"><span class="doc">Logging and Statistics</span></a>.</p>
 </div>
 </div>

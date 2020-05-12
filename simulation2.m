@@ -39,11 +39,18 @@ fclose(fid);
 
 % We can optimize the number of truck and shovels that are required to
 % reach a production target
-production_target = 4*1e6;  % [kg]
+production_target = 3*1e6;  % [kg]
 n = 10;                     % test each configuration n times
 result_tuple = cell(py.main.optimize_configuration(production_target, n, param));
 
-%%
+% Change the number of trucks and shovels using the values found by the
+% optimization procedure
+param.truckPolicy = param.truckPolicy(1:double(result_tuple{1}));
+param.shovelPolicy = param.shovelPolicy(1:double(result_tuple{2}));
+param.nShovels = length(param.shovelPolicy);
+param.nTrucks = length(param.truckPolicy);
+
+% Execute the simulation experiment
 output = cell(py.main.std(param));
 
 experiment_results = jsondecode(string(output{1}));

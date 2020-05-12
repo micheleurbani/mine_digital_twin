@@ -3,11 +3,37 @@ Optimization
 ============
 
 The Mine Maintenance Simulator can be used to replicate O&M in a mine.
+Explanation of the (simulation) optimization procedures provided within the package is provided in the following.
+All the function that are mentioned below can be imported from the module ``main.py``.
+
+Optimization of Mine Configuration
+==================================
+
+The number of trucks and shovels that are operating in the mine can be optimized with respect to the taget production throughput.
+The function ``optimize_configuration`` provides this functionality; the function returns the number of trucks and shovels that guarantees to reach the target with the 95% of probability.
+
+.. note::
+
+    The function still presents a drawback: Since the ``multiprocessing`` module is used, some windows are opened and closed during the execution of the functoin. In practice it is not possible to work on other tasks while the function is running.
+
+The documentation is reported in the following:
+
+.. autofunction:: main.optimize_configuration
+
+Resources Optimization in Detail
+--------------------------------
+
+The optimization procedure start testing the system usign the minimum amount of shovels and the maximum amount of trucks that are avilable.
+The 95-th percentile of the throughput distribution is calculated and it is tested against the production target; if the test is negative, the number of shovels is increased of one and the test is repeated, else the procedure start to optimize the number of trucks.
+The latter is decreased of one and the 95-th percentile is tested against the production target; in case the resulting througput is greater than the target a configuration with one truck less is tested, otherwise the optimal number of trucks is returned.
+
+Optimization of PM thresholds
+=============================
 Maintenance thresholds values can be usede to express decision maker preferences with respect the execution of preventive maintenance.
 In the following, the set of tools that are available for optimization of such thresholds is presented.
 
 Genetic Algorithm
-=================
+-----------------
 
 Genetic algorithm (GA) is a suboptimal tool to optimize maintenance thresholds, however it is way better than hand tuning of parameters.
 The main reason for low preferences of GA is the nature of the problem, wihch is stochastic.
@@ -16,7 +42,7 @@ With the mine simulator this is not the case because each run of the experiment 
 Since we are searching for maintenance threshold values that can perform well on average, the use of the seed for replication of a simulation instance is methodologically wrong.
 
 GA Documentation and Instructions for use
------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following is the documentation of the GA.
 
