@@ -591,8 +591,8 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
     :param float target: the production target in hundreds of kilograms
     :param int n: the number of runs used to perform the 95% probability test
     :param dict param: the dictionary containing the parameters to run the simulation (maintenance thresholds, simulation horizon, etc.)
-    :param int shovels_ub: the maximum number of shovels allowed
-    :param int trucks_ub: the maximum number of trucks allowed
+    :param int shovels_ub: the maximum number of shovels allowed, by default is set equal to three
+    :param int trucks_ub: the maximum number of trucks allowed, by default is set equal to ten
     :return: a tuple containing the minimum number of trucks and shovels that guarantees to reach the target throughput with 95% probability
     :rtype: tuple
 
