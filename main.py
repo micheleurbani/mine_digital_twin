@@ -2,12 +2,11 @@ from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
 from statistics import mean
-#import numpy as np
 #import matplotlib.pyplot as plt
 #from tqdm import tqdm
-#from multiprocessing import Pool
+from multiprocessing import Pool
 
-def std(param, time_parameters=None, output=True):
+def std(param, time_parameters=None, output=True, for_internal_use=False):
     """
     The function asks for a dictionary where we specify the parameters required by the simulation. Parameters are listed below:
 
@@ -154,7 +153,8 @@ def std(param, time_parameters=None, output=True):
         time_parameters["Shovel%d"%i]["LastMaintenance"] = shovels[i].lastMaintenance
         time_parameters["Shovel%d"%i]["NextFault"] = shovels[i].nextFault
 
-    #return env.statistics
+    if for_internal_use:
+        return env.statistics
     return json.dumps(env.statistics), json.dumps(time_parameters)
 
 def test(SIM_TIME,seed):
@@ -556,17 +556,25 @@ def mineMap(thresholds):
     plt.savefig("figures/mine_map.png")
 
 def output_amount(param, time_parameters=None):
-        results = std(param, time_parameters=time_parameters, output=False)
-        throughput = 0
-        for i in range(2):
-            if len(results['DumpSite%d'%i]) > 0:
-                throughput += np.sum(np.array(results['DumpSite%d'%i])[:,-1],0)
-        return throughput
+    results = std(param, time_parameters=time_parameters, output=False, for_internal_use=True)
+    throughput = 0
+    for i in range(2):
+        if len(results['DumpSite%d'%i]) > 0:
+            throughput += sum([x[1] for x in results['DumpSite%d'%i]])
+    return throughput
 
 def calculate_output(n, attempt_param, time_parameters=None):
+
+    def percentile(data, P):
+        from math import ceil
+        n = int(ceil(P * len(data)))
+        return data[n-1]
+
     with Pool() as p:
-        production_outputs = list(p.starmap(output_amount, [(attempt_param,) for _ in range(n)]))
-    return np.percentile(production_outputs, 95)
+        production_outputs = list(p.starmap(output_amount, [(attempt_param,) for _ in range(int(n))]))
+
+    # production_outputs = [output_amount(attempt_param, time_parameters=time_parameters) for _ in range(int(n))]
+    return percentile(production_outputs, P=0.95)
 
 def change_configuration(nshovels, ntrucks, param):
     attempt_param = dict(param)
@@ -633,15 +641,15 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
 
 
 if __name__ == "__main__":
-    with open('param.json', 'r') as f:
-        param = json.load(f)
-    with open('results2.json', 'r') as f:
-        thresholds = json.load(f)
-    param['shovelPolicy'] = thresholds['shovels']
-    param['truckPolicy'] =  thresholds['trucks']
-    param['seed'] = []
+    # with open('param.json', 'r') as f:
+    #     param = json.load(f)
+    # with open('results2.json', 'r') as f:
+    #     thresholds = json.load(f)
+    # param['shovelPolicy'] = thresholds['shovels']
+    # param['truckPolicy'] =  thresholds['trucks']
+    # param['seed'] = []
 
-    results = std(param)
+    # results = std(param)
 
     # optimize_configuration(4*1e6, 10, param)
 
@@ -649,4 +657,4 @@ if __name__ == "__main__":
 
     # with open("results.json", "w") as f:
     #     json.dump(best, f)
-    # pass
+    pass

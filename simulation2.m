@@ -12,7 +12,7 @@ end
 param = struct();
 % Declare shovel policy
 param.shovelPolicy = [2734.068, 2815.389, 3340.196];
-% param.shovelPolicy = [1.068, 1.389, 1.196];
+
 % Declare truck policy
 param.truckPolicy = [1122.016, 2795.403, 627.217, 2434.159, 1835.745, 1060.458, 662.486, 1010.808, 659.963, 1813.513];
 
@@ -37,6 +37,13 @@ if fid == -1, error('Cannot create JSON file'); end
 fwrite(fid, json_format, 'char');
 fclose(fid);
 
+% We can optimize the number of truck and shovels that are required to
+% reach a production target
+production_target = 4*1e6;  % [kg]
+n = 10;                     % test each configuration n times
+result_tuple = cell(py.main.optimize_configuration(production_target, n, param));
+
+%%
 output = cell(py.main.std(param));
 
 experiment_results = jsondecode(string(output{1}));
