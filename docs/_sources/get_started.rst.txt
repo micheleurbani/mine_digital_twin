@@ -109,7 +109,7 @@ The simulation is finally run by calling the function ``std`` from the module ``
 The output of the function is a Python tuple containing the results of the experiment and the parameters required to restart the simulation, both in a JSON format.
 The tuple must be casted into a MatLab cell array using the function ``cell()``.
 Each of the fields of the cell contains a Python string, which in turn must be converted in a MatLab string and subsequently decoded by MatLab.
-String casting is performed using the function ``string()` and decoding is performed using ``jsondecode()``.
+String casting is performed using the function ``string()`` and decoding is performed using ``jsondecode()``.
 
 .. highlight:: matlab
 
