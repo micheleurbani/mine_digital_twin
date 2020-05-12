@@ -2,10 +2,10 @@ from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
 from statistics import mean
-import numpy as np
-import matplotlib.pyplot as plt
-from tqdm import tqdm
-from multiprocessing import Pool
+#import numpy as np
+#import matplotlib.pyplot as plt
+#from tqdm import tqdm
+#from multiprocessing import Pool
 
 def std(param, time_parameters=None, output=True):
     """
@@ -154,8 +154,8 @@ def std(param, time_parameters=None, output=True):
         time_parameters["Shovel%d"%i]["LastMaintenance"] = shovels[i].lastMaintenance
         time_parameters["Shovel%d"%i]["NextFault"] = shovels[i].nextFault
 
-    return env.statistics
-    # return json.dumps(env.statistics), json.dumps(time_parameters)
+    #return env.statistics
+    return json.dumps(env.statistics), json.dumps(time_parameters)
 
 def test(SIM_TIME,seed):
     """The function run a single instance of the simulation experiment.
@@ -641,7 +641,9 @@ if __name__ == "__main__":
     param['truckPolicy'] =  thresholds['trucks']
     param['seed'] = []
 
-    optimize_configuration(4*1e6, 10, param)
+    results = std(param)
+
+    # optimize_configuration(4*1e6, 10, param)
 
     # best, score = GA(70, 13, 2*1e5)
 

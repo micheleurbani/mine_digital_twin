@@ -147,9 +147,9 @@ class Truck(object):
                 workshop = shovel.assignment(workshops)
                 expTaskTime = shovel.distance(workshop.coordinates) + shovel.waitingTime()
                 if Shovel.preventiveMaintenanceRule == 'condinal_probability':
-                    doMaintenance = self.doPreventiveMaintenance(expTaskTime=expTaskTime)
+                    doMaintenance = shovel.doPreventiveMaintenance(expTaskTime=expTaskTime)
                 elif Shovel.preventiveMaintenanceRule == 'age_based':
-                    doMaintenance = self.doPreventiveMaintenanceAgeBased(expTaskTime=expTaskTime)
+                    doMaintenance = shovel.doPreventiveMaintenanceAgeBased(expTaskTime=expTaskTime)
                 elif Shovel.preventiveMaintenanceRule is None:
                     raise EnvironmentError
                 if doMaintenance:
@@ -582,7 +582,6 @@ class Shovel(Server):
         """
         The method is a generator function which replicates the maintenance operations for a shovel in case of preventive maintenance.
         """
-        DEBUG = False
         with self.machine.request(priority=1) as req:
             if DEBUG:
                 print("Shovel%d     failed                at %.2f." % (self.id, self.env.now))
@@ -629,7 +628,7 @@ class Shovel(Server):
             self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     arrived at its site            at %.2f." %(self.id,self.env.now))
             self.env.statistics["Shovel%d" %self.id]["Statistics"]["TravelTime"] += self.env.now - t
             t = self.env.now
-
+        # REGENERATE THE FAULT EVENT
         self.failure = self.env.process(self.fault())
 
 
