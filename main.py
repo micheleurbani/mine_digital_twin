@@ -610,6 +610,7 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
     print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
     i += 1
 
+    # Optimize the number of shovels
     while not test_shovels:
         if guaranteed_output > target:
             test_shovels = True
@@ -619,9 +620,9 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
             attempt_param = change_configuration(nshovels, ntrucks, param)
             guaranteed_output = calculate_output(n, attempt_param)
 
-            print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
+            print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output} [ton]")
             i += 1
-
+    # Optimize the number of trucks
     while not test:
         if guaranteed_output < target:
             if ntrucks + 1 > trucks_ub:
@@ -632,14 +633,14 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
                 attempt_param = change_configuration(nshovels, ntrucks, param)
                 guaranteed_output = calculate_output(n, attempt_param)
                 test = True
-                print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
+                print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output} [ton]")
                 i += 1
         elif guaranteed_output > target:
             if ntrucks - 1 >= trucks_lb:
                 ntrucks -= 1
                 attempt_param = change_configuration(nshovels, ntrucks, param)
                 guaranteed_output = calculate_output(n, attempt_param)
-                print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
+                print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output} [ton]")
                 i += 1
             else:
                 test = True
