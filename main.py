@@ -610,39 +610,46 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
     print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
     i += 1
 
-    while not test:
-        if not test_shovels:
+    while not test_shovels:
+        if guaranteed_output > target:
+            test_shovels = True
+        else:
             if nshovels + 1 <= shovels_ub: nshovels += 1
             else: test_shovels = True
             attempt_param = change_configuration(nshovels, ntrucks, param)
             guaranteed_output = calculate_output(n, attempt_param)
-            if guaranteed_output > target:
-                test_shovels = True
-        elif test_shovels:
-            if guaranteed_output < target:
-                if ntrucks + 1 > trucks_ub:
-                    print(f"Impossible to reach the target with {shovels_ub} shovels and {trucks_ub} trucks.")
-                    break
-                else:
-                    ntrucks += 1
-                    attempt_param = change_configuration(nshovels, ntrucks, param)
-                    guaranteed_output = calculate_output(n, attempt_param)
-                    test = True
-            elif guaranteed_output > target:
-                if ntrucks - 1 >= trucks_lb:
-                    ntrucks -= 1
-                    attempt_param = change_configuration(nshovels, ntrucks, param)
-                    guaranteed_output = calculate_output(n, attempt_param)
 
-        print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
-        i += 1
+            print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
+            i += 1
+
+    while not test:
+        if guaranteed_output < target:
+            if ntrucks + 1 > trucks_ub:
+                print(f"Impossible to reach the target with {shovels_ub} shovels and {trucks_ub} trucks.")
+                break
+            else:
+                ntrucks += 1
+                attempt_param = change_configuration(nshovels, ntrucks, param)
+                guaranteed_output = calculate_output(n, attempt_param)
+                test = True
+                print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
+                i += 1
+        elif guaranteed_output > target:
+            if ntrucks - 1 >= trucks_lb:
+                ntrucks -= 1
+                attempt_param = change_configuration(nshovels, ntrucks, param)
+                guaranteed_output = calculate_output(n, attempt_param)
+                print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
+                i += 1
+            else:
+                test = True
 
     return ntrucks, nshovels
 
 
 if __name__ == "__main__":
-    # with open('param.json', 'r') as f:
-    #     param = json.load(f)
+    with open('param.json', 'r') as f:
+        param = json.load(f)
     # with open('results2.json', 'r') as f:
     #     thresholds = json.load(f)
     # param['shovelPolicy'] = thresholds['shovels']
@@ -651,10 +658,10 @@ if __name__ == "__main__":
 
     # results = std(param)
 
-    # optimize_configuration(4*1e6, 10, param)
+    optimize_configuration(4*1e6, 10, param)
 
     # best, score = GA(70, 13, 2*1e5)
 
     # with open("results.json", "w") as f:
     #     json.dump(best, f)
-    pass
+    # pass
