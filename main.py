@@ -44,9 +44,15 @@ def std(param, time_parameters=None, output=True, for_internal_use=False):
     - the absolute time of the next fault [in minutes]
 
     """
-
-    assert len(param['shovelPolicy']) == param['nShovels']
-    assert len(param['truckPolicy']) == param['nTrucks']
+    if type(param['shovelPolicy']) is list:
+        assert len(param['shovelPolicy']) == int(param['nShovels'])
+    elif type(param['shovelPolicy']) is float:
+        param['shovelPolicy'] = [param['shovelPolicy']]
+        print(param['nShovels'])
+    if type(param['truckPolicy']) is list:
+        assert len(param['truckPolicy']) == int(param['nTrucks'])
+    elif type(param['truckPolicy']) is float:
+        param['truckPolicy'] = [param['truckPolicy']]
 
     # Create the simulation environment
     env = simpy.Environment(initial_time=param['initialTime'])
@@ -607,7 +613,7 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
     attempt_param = change_configuration(nshovels, ntrucks, param)
     # Estimate the production output for the initial configuration.
     guaranteed_output = calculate_output(n, attempt_param)
-    print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output/10} [ton]")
+    print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output} [ton]")
     i += 1
 
     # Optimize the number of shovels
@@ -659,7 +665,7 @@ if __name__ == "__main__":
 
     # results = std(param)
 
-    optimize_configuration(4*1e6, 10, param)
+    optimize_configuration(4, 10, param)
 
     # best, score = GA(70, 13, 2*1e5)
 

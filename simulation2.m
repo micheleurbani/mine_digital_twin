@@ -11,10 +11,10 @@ end
 % Create a struct variable where to store simulation parameters
 param = struct();
 % Declare shovel policy
-param.shovelPolicy = [2339.737960676068, 2391.02576996754, 2233.7787803811005083];
+param.shovelPolicy = [2339.737960676068];%, 2391.02576996754, 2233.7787803811005083];
 
 % Declare truck policy
-param.truckPolicy = [885.803382511743, 925.74832936065607, 2385.6115729299822, 1530.1564858884947, 2763.5328604418364, 2067.5395092364734, 2917.109935478168, 2659.6126916001567, 1602.06002774890186, 2420.4681897443584];
+param.truckPolicy = [885.803382511743];%, 925.74832936065607, 2385.6115729299822, 1530.1564858884947, 2763.5328604418364, 2067.5395092364734, 2917.109935478168, 2659.6126916001567, 1602.06002774890186, 2420.4681897443584];
 
 % Specify how many items are present in the mine
 param.nShovels = length(param.shovelPolicy);
@@ -39,16 +39,16 @@ fclose(fid);
 
 % We can optimize the number of truck and shovels that are required to
 % reach a production target
-production_target = 3*1e6;  % [kg]
-n = 10;                     % test each configuration n times
-result_tuple = cell(py.main.optimize_configuration(production_target, n, param));
+% production_target = 3;  % [kg]
+% n = 10;                     % test each configuration n times
+% result_tuple = cell(py.main.optimize_configuration(production_target, n, param));
 
 % Change the number of trucks and shovels using the values found by the
 % optimization procedure
-param.truckPolicy = param.truckPolicy(1:double(result_tuple{1}));
-param.shovelPolicy = param.shovelPolicy(1:double(result_tuple{2}));
-param.nShovels = length(param.shovelPolicy);
-param.nTrucks = length(param.truckPolicy);
+% param.truckPolicy = param.truckPolicy(1:double(result_tuple{1}));
+% param.shovelPolicy = param.shovelPolicy(1:double(result_tuple{2}));
+% param.nShovels = length(param.shovelPolicy);
+% param.nTrucks = length(param.truckPolicy);
 
 % Execute the simulation experiment
 output = cell(py.main.std(param));
