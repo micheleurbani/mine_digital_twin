@@ -2,7 +2,7 @@ from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
 from statistics import mean
-#import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 #from tqdm import tqdm
 from multiprocessing import Pool
 
@@ -511,6 +511,7 @@ def GA(initialPopSize, items, simTime):
 def mineMap(thresholds):
     """The function plots the position of sites within the mine."""
     env = simpy.Environment()
+    env.statistics = dict()
     DEBUG = False
     # WORKSHOPS DECLARATION
     with open("data/workshops_data.csv","r",newline="\n") as f:
@@ -549,7 +550,7 @@ def mineMap(thresholds):
         dumpsiteData = [x for x in doc]
     dumpsites = [
         DumpSite(env,i,coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),mu=dumpsiteData[i][0],sigma=dumpsiteData[i][1])
-        for i in range(4)]
+        for i in range(2)]
 
     colors = ['orange', 'blue', 'green']
     for site in enumerate([shovels, workshops, dumpsites]):
@@ -557,9 +558,11 @@ def mineMap(thresholds):
             plt.scatter(i[1].coordinates[0],i[1].coordinates[1],label=i[1].__class__.__name__+str(i[0]),c=colors[site[0]])
             plt.annotate(i[1].__class__.__name__+str(i[0]),(i[1].coordinates[0],i[1].coordinates[1]))
     plt.title("Sites location on the map")
+    plt.xlabel("x")
+    plt.ylabel("y")
     plt.grid()
-    plt.legend()
-    plt.savefig("figures/mine_map.png")
+    plt.legend(loc=9)
+    plt.savefig("figures/mine_map.eps")
 
 def output_amount(param, time_parameters=None):
     results = std(param, time_parameters=time_parameters, output=False, for_internal_use=True)
@@ -653,22 +656,162 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
 
     return ntrucks, nshovels
 
+def parametrizedP(a, sim_time, output=False):
+
+    from scipy.special import gamma
+
+    # Create the simulation environment
+    env = simpy.Environment()
+    env.statistics = dict()
+
+    with open("data/workshops_data.csv","r",newline="\n") as f:
+        doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
+        workshopsData = [x for x in doc]
+    workshops = [
+        WorkShop(env,i,(workshopsData[i][0],workshopsData[i][1]))
+        for i in range(2)]
+
+    with open("data/shovels_data.csv","r",newline="\n") as f:
+        doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
+        shovelsData = [x for x in doc]
+    shovels = [
+        Shovel(
+            env,
+            i,
+            coordinates=(shovelsData[i][0],shovelsData[i][1]),
+            mu=shovelsData[i][2],
+            sigma=shovelsData[i][3],
+            muPreventive=shovelsData[i][4],
+            sigmaPreventive=shovelsData[i][5],
+            muCorrective=shovelsData[i][6],
+            sigmaCorrective=shovelsData[i][7],
+            alpha=shovelsData[i][8],
+            beta=shovelsData[i][9],
+            Cc=shovelsData[i][10],
+            Cp=shovelsData[i][11],
+            p=a * shovelsData[i][8] * gamma(1 + 1/shovelsData[i][9]),
+            workshops=workshops)
+        for i in range(3)]
+
+    with open("data/dumpsites_data.csv","r",newline="\n") as f:
+        doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
+        dumpsiteData = [x for x in doc]
+    dumpsites = [
+        DumpSite(env,i,coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),mu=dumpsiteData[i][0],sigma=dumpsiteData[i][1])
+        for i in range(2)]
+
+    with open("data/truck_data.csv","r",newline="\n") as f:
+        doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
+        truckData = [x for x in doc]
+    trucks = [Truck(
+        alpha=truckData[i][0],
+        beta=truckData[i][1],
+        muCorrective=truckData[i][6],
+        sigmaCorrective=truckData[i][7],
+        muPreventive=truckData[i][4],
+        sigmaPreventive=truckData[i][5],
+        Cc=truckData[i][2],
+        Cp=truckData[i][3],
+        p=a * truckData[i][0] * gamma(1 + 1/truckData[i][1]),
+        env=env,
+        id=i,
+        shovels=shovels,
+        dumpsites=dumpsites,
+        workshops=workshops,
+        muCapacity=truckData[i][8],
+        sigmaCapacity=truckData[i][9])
+        for i in range(10)]
+
+    begin = datetime.now()
+    # Stick the policy to the classes Shovel and Trucks
+    Shovel.preventiveMaintenanceRule = "age_based"
+    Truck.preventiveMaintenanceRule = "age_based"
+
+    env.run(until=sim_time)
+
+    time_parameters = dict()
+    CMcost = 0
+    PMcost = 0
+
+    # Results and statistics update
+    for i in range(len(trucks)):
+        if output:
+            print("Truck%d: \tFailures =" %i, env.statistics["Truck%d" %i]["Failure"], "\t Preventive =", env.statistics["Truck%d" %i]["PreventiveInterventions"])
+        s = env.statistics["Truck%d"%i]["Statistics"]
+        s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"]) / (sim_time)
+        del env.statistics["Truck%d"%i]["PreventiveMaintenanceHistory"]
+        del env.statistics["Truck%d"%i]["FailureHistory"]
+        del env.statistics["Truck%d"%i]["History"]
+        CMcost += trucks[i].Cc * env.statistics["Truck%d"%i]["Failure"]
+        PMcost += trucks[i].Cp * env.statistics["Truck%d"%i]["PreventiveInterventions"]
+
+    for i in range(len(shovels)):
+        if output:
+            print("Shovel%d:\tFailures =" %i, env.statistics["Shovel%d" %i]["Failure"], "\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
+        s = env.statistics["Shovel%d"%i]["Statistics"]
+        s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"] + s['TravelTime']) / (sim_time)
+        s["IdleTime"] = sim_time - s["WorkingTime"] - s["TravelTime"] - s["TimeInQueue"] - s["Failed"] - s["PMRepair"] - s["CMRepair"]
+        del env.statistics["Shovel%d"%i]["PreventiveMaintenanceHistory"]
+        del env.statistics["Shovel%d"%i]["FailureHistory"]
+        del env.statistics["Shovel%d"%i]["History"]
+        CMcost += shovels[i].Cc * env.statistics["Shovel%d"%i]["Failure"]
+        PMcost += shovels[i].Cp * env.statistics["Shovel%d"%i]["PreventiveInterventions"]
+
+    for i in range(2):
+        del env.statistics["DumpSite%d"%i]
+
+    return CMcost, PMcost
+
+def mtbf_vs_cost_downtime(values):
+    from tqdm import tqdm
+    import numpy as np
+
+    random.seed(42)
+    sim_time = 1e5
+    N = 5
+    results = np.ndarray((len(values), N, 2))
+
+    for i in tqdm(range(len(values))):
+        for j in range(N):
+            results[i,j,0], results[i,j,1] = parametrizedP(values[i], sim_time)
+
+    np.save("costs", results)
+
+def plot_costs(results, values):
+    import numpy as np
+
+    CM = np.mean(results[:,:,0], axis=1)/1000
+    PM = np.mean(results[:,:,1], axis=1)/1000
+    plt.plot(values, CM, values, PM, values, CM+PM)
+    plt.fill_between(values, CM, PM, where=CM >= PM, facecolor='#F7C8C1')
+    plt.fill_between(values, CM, PM, where=PM >= CM, facecolor='#C1D9F7')
+    plt.xlabel("a")
+    plt.title("Total Cost of CM/PM")
+    plt.ylabel("Cost")
+    plt.legend(["CM cost", "PM cost", "Total cost"])
+    plt.savefig("figures/costs1.png")
+    plt.show()
 
 if __name__ == "__main__":
-    with open('param.json', 'r') as f:
-        param = json.load(f)
+    pass
+    # values = [1, 2, 3, 5, 10, 18, 20, 30, 50, 70]
+
+    # mtbf_vs_cost_downtime(values)
+    # import numpy as np
+    # results = np.load("costs.npy")
+    # plot_costs(results, values)
+
+    # with open('param.json', 'r') as f:
+    #     param = json.load(f)
     # with open('results2.json', 'r') as f:
     #     thresholds = json.load(f)
     # param['shovelPolicy'] = thresholds['shovels']
     # param['truckPolicy'] =  thresholds['trucks']
     # param['seed'] = []
-
     # results = std(param)
-
-    optimize_configuration(4, 10, param)
-
+    # optimize_configuration(4, 10, param)
     # best, score = GA(70, 13, 2*1e5)
-
     # with open("results.json", "w") as f:
     #     json.dump(best, f)
     # pass
+
