@@ -230,7 +230,6 @@ class Truck(object):
                             print("Truck%d      repaired by Workshop%d         at %.2f." %(self.id,workshop.id,self.env.now))
                         self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      repaired by Workshop%d         at %.2f." %(self.id,workshop.id,self.env.now))
                         self.env.statistics["Truck%d"%self.id]["Statistics"]["PMRepair"] += self.env.now - t
-                        self.env.statistics["Truck%d"%self.id]["LastMaintenance"] = self.env.now
                         t = self.env.now
 
                     # REGENERATE THE FAULT EVENT
@@ -267,7 +266,6 @@ class Truck(object):
                         print("Truck%d      repaired by Workshop%d         at %.2f." %(self.id,workshop.id,self.env.now))
                     self.env.statistics["Truck%d"%self.id]["History"].append("Truck%d      repaired by Workshop%d          at %.2f." %(self.id,workshop.id,self.env.now))
                     self.env.statistics["Truck%d"%self.id]["Statistics"]["CMRepair"] += self.env.now - t
-                    self.env.statistics["Truck%d"%self.id]["LastMaintenance"] = self.env.now
                     t = self.env.now
                 # REGENERATE THE FAULT EVENT
                 self.failure = self.env.process(self.fault())
@@ -540,7 +538,6 @@ class Shovel(Server):
                                 print("Shovel%d     repaired at Workshop%d        at %.2f." %(self.id,workshop.id,self.env.now))
                             self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     repaired at Workshop%d          at %.2f." %(self.id,workshop.id,self.env.now))
                             self.env.statistics["Shovel%d" %self.id]["Statistics"]["CMRepair"] += self.env.now - t
-                            self.env.statistics["Truck%d"%self.id]["LastMaintenance"] = self.env.now
                             t = self.env.now
 
                         # TRAVEL
@@ -620,7 +617,6 @@ class Shovel(Server):
                     print("Shovel%d     repaired at Workshop%d        at %.2f." %(self.id,workshop.id,self.env.now))
                 self.env.statistics["Shovel%d" %self.id]["History"].append("Shovel%d     repaired at Workshop%d          at %.2f." %(self.id,workshop.id,self.env.now))
                 self.env.statistics["Shovel%d" %self.id]["Statistics"]["PMRepair"] += self.env.now - t
-                self.env.statistics["Truck%d"%self.id]["LastMaintenance"] = self.env.now
                 t = self.env.now
 
             # TRAVEL

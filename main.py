@@ -2,8 +2,6 @@ from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
 from statistics import mean
-import matplotlib.pyplot as plt
-#from tqdm import tqdm
 from multiprocessing import Pool
 
 def std(param, time_parameters=None, output=True, for_internal_use=False):
@@ -48,7 +46,6 @@ def std(param, time_parameters=None, output=True, for_internal_use=False):
         assert len(param['shovelPolicy']) == int(param['nShovels'])
     elif type(param['shovelPolicy']) is float:
         param['shovelPolicy'] = [param['shovelPolicy']]
-        print(param['nShovels'])
     if type(param['truckPolicy']) is list:
         assert len(param['truckPolicy']) == int(param['nTrucks'])
     elif type(param['truckPolicy']) is float:
@@ -123,7 +120,7 @@ def std(param, time_parameters=None, output=True, for_internal_use=False):
         for truck in trucks:
             truck.lastMaintenance = time_parameters["Truck%d"%truck.id]["LastMaintenance"]
             truck.nextFault = time_parameters["Truck%d"%truck.id]["NextFault"]
-
+    print(env.statistics)
     try:
         random.seed(param["seed"])
     except:
@@ -395,6 +392,8 @@ def GA(initialPopSize, items, simTime):
     :rtype: touple
 
     """
+    import matplotlib.pyplot as plt
+    from tqdm import tqdm
 
     def generateIndividuals(popSize, nGenes):
         """
@@ -948,7 +947,7 @@ if __name__ == "__main__":
     # plot_costs(results, values)
 
     # EXP 2
-    variable_costs()
+    # variable_costs()
 
     # with open('param.json', 'r') as f:
     #     param = json.load(f)
@@ -962,5 +961,4 @@ if __name__ == "__main__":
     # best, score = GA(70, 13, 2*1e5)
     # with open("results.json", "w") as f:
     #     json.dump(best, f)
-    # pass
-
+    pass
