@@ -2,7 +2,7 @@ from Mine import *
 import simpy, csv, json
 from datetime import datetime, timedelta
 from statistics import mean
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 #from tqdm import tqdm
 from multiprocessing import Pool
 
@@ -762,6 +762,112 @@ def parametrizedP(a, sim_time, output=False):
 
     return CMcost, PMcost
 
+def parametrizedCost(a, b, sim_time, output=False):
+
+    from scipy.special import gamma
+
+    # Create the simulation environment
+    env = simpy.Environment()
+    env.statistics = dict()
+
+    with open("data/workshops_data.csv","r",newline="\n") as f:
+        doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
+        workshopsData = [x for x in doc]
+    workshops = [
+        WorkShop(env,i,(workshopsData[i][0],workshopsData[i][1]))
+        for i in range(2)]
+
+    with open("data/shovels_data.csv","r",newline="\n") as f:
+        doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
+        shovelsData = [x for x in doc]
+    shovels = [
+        Shovel(
+            env,
+            i,
+            coordinates=(shovelsData[i][0],shovelsData[i][1]),
+            mu=shovelsData[i][2],
+            sigma=shovelsData[i][3],
+            muPreventive=shovelsData[i][4],
+            sigmaPreventive=shovelsData[i][5],
+            muCorrective=shovelsData[i][6],
+            sigmaCorrective=shovelsData[i][7],
+            alpha=shovelsData[i][8],
+            beta=shovelsData[i][9],
+            Cc=shovelsData[i][10],
+            Cp=b * shovelsData[i][10],
+            p=a * shovelsData[i][8] * gamma(1 + 1/shovelsData[i][9]),
+            workshops=workshops)
+        for i in range(3)]
+
+    with open("data/dumpsites_data.csv","r",newline="\n") as f:
+        doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
+        dumpsiteData = [x for x in doc]
+    dumpsites = [
+        DumpSite(env,i,coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),mu=dumpsiteData[i][0],sigma=dumpsiteData[i][1])
+        for i in range(2)]
+
+    with open("data/truck_data.csv","r",newline="\n") as f:
+        doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
+        truckData = [x for x in doc]
+    trucks = [Truck(
+        alpha=truckData[i][0],
+        beta=truckData[i][1],
+        muCorrective=truckData[i][6],
+        sigmaCorrective=truckData[i][7],
+        muPreventive=truckData[i][4],
+        sigmaPreventive=truckData[i][5],
+        Cc=truckData[i][2],
+        Cp=b * truckData[i][2],
+        p=a * truckData[i][0] * gamma(1 + 1/truckData[i][1]),
+        env=env,
+        id=i,
+        shovels=shovels,
+        dumpsites=dumpsites,
+        workshops=workshops,
+        muCapacity=truckData[i][8],
+        sigmaCapacity=truckData[i][9])
+        for i in range(10)]
+
+    begin = datetime.now()
+    # Stick the policy to the classes Shovel and Trucks
+    Shovel.preventiveMaintenanceRule = "age_based"
+    Truck.preventiveMaintenanceRule = "age_based"
+
+    env.run(until=sim_time)
+
+    time_parameters = dict()
+    CMcost = 0
+    PMcost = 0
+
+    # Results and statistics update
+    for i in range(len(trucks)):
+        if output:
+            print("Truck%d: \tFailures =" %i, env.statistics["Truck%d" %i]["Failure"], "\t Preventive =", env.statistics["Truck%d" %i]["PreventiveInterventions"])
+        s = env.statistics["Truck%d"%i]["Statistics"]
+        s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"]) / (sim_time)
+        del env.statistics["Truck%d"%i]["PreventiveMaintenanceHistory"]
+        del env.statistics["Truck%d"%i]["FailureHistory"]
+        del env.statistics["Truck%d"%i]["History"]
+        CMcost += trucks[i].Cc * env.statistics["Truck%d"%i]["Failure"]
+        PMcost += trucks[i].Cp * env.statistics["Truck%d"%i]["PreventiveInterventions"]
+
+    for i in range(len(shovels)):
+        if output:
+            print("Shovel%d:\tFailures =" %i, env.statistics["Shovel%d" %i]["Failure"], "\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
+        s = env.statistics["Shovel%d"%i]["Statistics"]
+        s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"] + s['TravelTime']) / (sim_time)
+        s["IdleTime"] = sim_time - s["WorkingTime"] - s["TravelTime"] - s["TimeInQueue"] - s["Failed"] - s["PMRepair"] - s["CMRepair"]
+        del env.statistics["Shovel%d"%i]["PreventiveMaintenanceHistory"]
+        del env.statistics["Shovel%d"%i]["FailureHistory"]
+        del env.statistics["Shovel%d"%i]["History"]
+        CMcost += shovels[i].Cc * env.statistics["Shovel%d"%i]["Failure"]
+        PMcost += shovels[i].Cp * env.statistics["Shovel%d"%i]["PreventiveInterventions"]
+
+    for i in range(2):
+        del env.statistics["DumpSite%d"%i]
+
+    return env.statistics
+
 def mtbf_vs_cost_downtime(values):
     from tqdm import tqdm
     import numpy as np
@@ -792,14 +898,57 @@ def plot_costs(results, values):
     plt.savefig("figures/costs1.png")
     plt.show()
 
-if __name__ == "__main__":
-    pass
-    # values = [1, 2, 3, 5, 10, 18, 20, 30, 50, 70]
+def variable_costs():
 
+    import numpy as np
+    import pprint
+    pp = pprint.PrettyPrinter(indent=0)
+
+    onlyCM = 50
+    balanced = 20
+    onlyPM = 2
+
+    maintenance = [onlyCM, balanced, onlyPM]
+
+    values = [0.2, 0.5, 1, 2, 3]
+
+    N = 10
+    sim_time = 1e5
+
+    results = np.ndarray((len(maintenance), len(values), N, 2))
+
+    for i in range(len(maintenance)):
+        for j in range(len(values)):
+            for k in range(N):
+                stats = parametrizedCost(maintenance[i], values[j], sim_time=sim_time)
+                results[i,j,k,0] += sum((stats["Truck%d"%t]["Statistics"]["CMRepair"] for t in range(10)))
+                results[i,j,k,0] += sum((stats["Truck%d"%t]["Statistics"]["PMRepair"] for t in range(10)))
+                results[i,j,k,1] += sum((stats["Shovel%d"%t]["Statistics"]["CMRepair"] for t in range(3)))
+                results[i,j,k,1] += sum((stats["Shovel%d"%t]["Statistics"]["PMRepair"] for t in range(3)))
+
+    results = np.mean(results, axis=2)
+    print(results)
+    np.save("downtime", results)
+    for i in range(len(maintenance)):
+        plt.plot(values, results[i,:,0])
+    for i in range(len(maintenance)):
+        plt.plot(values, results[i,:,1])
+    plt.xlabel("b (PM cost as '%' of CM cost)")
+    plt.ylabel("cost")
+    plt.legend(["Downtime - OnlyCM", "Downtime - Balanced", "Downtime - OnlyPM", "Preventive - OnlyCM", "Preventive - Balanced", "Preventive - OnlyPM"])
+    plt.show()
+
+
+if __name__ == "__main__":
+    # EXP 1
+    # values = [1, 2, 3, 5, 10, 18, 20, 30, 50, 70]
     # mtbf_vs_cost_downtime(values)
     # import numpy as np
     # results = np.load("costs.npy")
     # plot_costs(results, values)
+
+    # EXP 2
+    variable_costs()
 
     # with open('param.json', 'r') as f:
     #     param = json.load(f)
