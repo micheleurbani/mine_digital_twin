@@ -120,7 +120,6 @@ def std(param, time_parameters=None, output=True, for_internal_use=False):
         for truck in trucks:
             truck.lastMaintenance = time_parameters["Truck%d"%truck.id]["LastMaintenance"]
             truck.nextFault = time_parameters["Truck%d"%truck.id]["NextFault"]
-    print(env.statistics)
     try:
         random.seed(param["seed"])
     except:
