@@ -900,6 +900,8 @@ def variable_costs():
 
     import numpy as np
     import pprint
+    import matplotlib.pyplot as plt
+
     pp = pprint.PrettyPrinter(indent=0)
 
     onlyCM = 50
