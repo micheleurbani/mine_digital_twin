@@ -1,7 +1,7 @@
 import simpy,random
 from math import exp, sqrt
 
-DEBUG = False
+DEBUG = True
 
 class Truck(object):
     """
@@ -172,7 +172,7 @@ class Truck(object):
                 t = self.env.now
 
                 # UNLOAD
-                with dumpsite.machine.request() as req:
+                with dumpsite.machine.request(priority=2) as req:
                     yield req
                     if DEBUG:
                         print("Truck%d      under unloading at DumpSite%d    at %.2f." %(self.id,dumpsite.id,self.env.now))
@@ -638,18 +638,44 @@ class DumpSite(Server):
     The class inherits the basic attributes from :class:`Server` and replicates the behavior of a dumpsite.
     """
 
-    def __init__(self, env, id, coordinates,mu,sigma):
+    def __init__(self, env, id, coordinates, mu, sigma, maxCapacity, millRate):
         super().__init__(env, id, coordinates,mu,sigma)
-        self.machine = simpy.Resource(env,capacity=1)
+        self.machine = simpy.PreemptiveResource(env,capacity=1)
+        self.stockpile = simpy.Container(env, capacity=maxCapacity, init=100)
+        self.control = env.process(self.stockpile_control())
+        self.milling = env.process(self.milling_machine(millRate))
         env.statistics["DumpSite%d" %self.id] = list()
 
     def unload(self,truck,amount):
-        self.env.statistics["DumpSite%d" %self.id].append([self.env.now, truck.capacity])
+        yield self.stockpile.put(amount)
+        self.env.statistics["DumpSite%d" %self.id].append([self.env.now, self.stockpile.level])
+        # print("%.3f \tDumpsite%d \t%.3f" % (self.env.now, self.id, self.stockpile.level))
         yield self.env.timeout(self.servingTime())
 
     def waitingTime(self):
         return (len(self.machine.queue) + self.machine.count) * self.mu
 
+    def stockpile_control(self):
+
+        while True:
+            if self.stockpile.level > self.stockpile.capacity:
+                # Stop the trucks from unloading by taking ownership of the dumpsite until the stockpile level allows unloading again
+                with self.machine.request(priority=1) as req:
+                    yield req
+                    while self.stockpile.level > self.stockpile.capacity:
+                        yield self.env.timeout(10)
+            else:
+                # Check every 10 min
+                yield self.env.timeout(10)
+
+    def milling_machine(self, millRate):
+        check_interval = 10 # in minutes
+        # check every 'check_interval' minutes
+        while True:
+            yield self.env.timeout(check_interval)
+            # get the material out of the stockpile
+            yield self.stockpile.get(millRate/60*check_interval)
+            self.env.statistics["DumpSite%d" %self.id].append([self.env.now, self.stockpile.level])
 
 class WorkShop(Server):
     """

@@ -92,7 +92,14 @@ def std(param, time_parameters=None, output=True, for_internal_use=False):
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
         dumpsiteData = [x for x in doc]
     dumpsites = [
-        DumpSite(env,i,coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),mu=dumpsiteData[i][0],sigma=dumpsiteData[i][1])
+        DumpSite(
+            env,
+            i,
+            coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),
+            mu=dumpsiteData[i][0],
+            sigma=dumpsiteData[i][1],
+            maxCapacity=param['maxCapacity']/param['nDumpSites'],
+            millRate=param['millRate'])
         for i in range(int(param['nDumpSites']))]
 
     with open("data/truck_data.csv","r",newline="\n") as f:
@@ -938,6 +945,17 @@ def variable_costs():
     plt.legend(["Downtime - OnlyCM", "Downtime - Balanced", "Downtime - OnlyPM", "Preventive - OnlyCM", "Preventive - Balanced", "Preventive - OnlyPM"])
     plt.show()
 
+def stockpiles_level(stats):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    d0 = np.array(stats["DumpSite0"])
+    d1 = np.array(stats["DumpSite1"])
+
+    plt.subplot(2,1,1)
+    plt.step(d0[:,0], d0[:,1])
+    plt.subplot(2,1,2)
+    plt.step(d1[:,0], d1[:,1])
+    plt.show()
 
 if __name__ == "__main__":
     # EXP 1
@@ -950,16 +968,16 @@ if __name__ == "__main__":
     # EXP 2
     # variable_costs()
 
-    # with open('param.json', 'r') as f:
-    #     param = json.load(f)
-    # with open('results2.json', 'r') as f:
-    #     thresholds = json.load(f)
-    # param['shovelPolicy'] = thresholds['shovels']
-    # param['truckPolicy'] =  thresholds['trucks']
-    # param['seed'] = []
-    # results = std(param)
+    with open('param.json', 'r') as f:
+        param = json.load(f)
+    # param['truckPolicy'] = param['truckPolicy'][0]
+    # param['nTrucks'] = 1
+
+    results = std(param, for_internal_use=True)
+    with open('stats.json', 'w') as f:
+        json.dump(results, f)
+    stockpiles_level(results)
     # optimize_configuration(4, 10, param)
     # best, score = GA(70, 13, 2*1e5)
     # with open("results.json", "w") as f:
     #     json.dump(best, f)
-    pass
