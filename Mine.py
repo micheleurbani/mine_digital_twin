@@ -438,7 +438,7 @@ class Shovel(Server):
         self.workshops = workshops
         self.failure = env.process(self.fault(nextFault=nextFault))
 
-        env.statistics["Shovel%d" %self.id] = {
+        env.statistics[self.__class__.__name__+"%d" %self.id] = {
             "Failure": 0,
             "FailureHistory": list(),
             "PreventiveInterventions": 0,
@@ -454,6 +454,7 @@ class Shovel(Server):
                 Failed=0,
                 WorkingTime=0,
             )}
+        env.statistics[self.__class__.__name__+"%d_queue"%self.id] = list()
 
     def timeToFailure(self):
         return 60 * random.weibullvariate(alpha=self.alpha,beta=self.beta)
@@ -646,12 +647,14 @@ class DumpSite(Server):
 
     def __init__(self, env, id, coordinates, mu, sigma, maxCapacity, millRate):
         super().__init__(env, id, coordinates,mu,sigma)
-        self.machine = simpy.PriorityResource(env,capacity=1)
+        self.machine = MonitoredPriorityResource(env,capacity=1,item_id=self.id,item_type=self.__class__.__name__)
         self.stockpile = simpy.Container(env, init=100)
         self.control = env.process(self.stockpile_control())
         self.milling = env.process(self.milling_machine(millRate))
-        env.statistics["DumpSite%d" %self.id] = list()
-        env.statistics["DumpSite%d_stockpileLevel" %self.id] = list()
+        env.statistics[self.__class__.__name__+"%d" %self.id] = list()
+        env.statistics[self.__class__.__name__+"%d_stockpileLevel" %self.id] = list()
+        env.statistics[self.__class__.__name__+"%d_queue"%self.id] = list()
+
 
     def unload(self,truck,amount):
         yield self.stockpile.put(amount)
@@ -693,8 +696,8 @@ class WorkShop(Server):
 
     def __init__(self, env, id, coordinates):
         super().__init__(env, id, coordinates)
-        self.machine = MonitoredResource(env,capacity=1,workshop_id=self.id,item_type=self.__class__.__name__)
-        env.statistics["WorkShop%d"%self.id] = list()
+        self.machine = MonitoredPriorityResource(env,capacity=1,item_id=self.id,item_type=self.__class__.__name__)
+        env.statistics[self.__class__.__name__+"%d_queue"%self.id] = list()
 
     def correctiveRepair(self,equipment):
         ttr = equipment.timeToRepairCorrective()
@@ -710,16 +713,16 @@ class WorkShop(Server):
         return len(self.machine.queue) + self.machine.count
 
 
-class MonitoredResource(simpy.PriorityResource):
-    def __init__(self, *args, workshop_id=None, item_type=None, **kwargs):
+class MonitoredPriorityResource(simpy.PriorityResource):
+    def __init__(self, *args, item_id=None, item_type=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.id = workshop_id
+        self.id = item_id
         self.item_type = item_type
 
     def request(self, *args, **kwargs):
-        self._env.statistics[self.item_type + str(self.id)].append([self._env.now, len(self.queue)])
+        self._env.statistics[self.item_type + str(self.id) + "_queue"].append([self._env.now, len(self.queue)])
         return super().request(*args, **kwargs)
 
     def release(self, *args, **kwargs):
-        self._env.statistics[self.item_type + str(self.id)].append([self._env.now, len(self.queue)])
+        self._env.statistics[self.item_type + str(self.id) + "_queue"].append([self._env.now, len(self.queue)])
         return super().release(*args, **kwargs)
