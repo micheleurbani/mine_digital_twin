@@ -99,7 +99,7 @@ def std(param, time_parameters=None, output=True, for_internal_use=False):
             mu=dumpsiteData[i][0],
             sigma=dumpsiteData[i][1],
             maxCapacity=param['maxCapacity']/param['nDumpSites'],
-            millRate=param['millRate'])
+            millRate=param['millRate']/param['nDumpSites'])
         for i in range(int(param['nDumpSites']))]
 
     with open("data/truck_data.csv","r",newline="\n") as f:
@@ -966,17 +966,15 @@ if __name__ == "__main__":
     # plot_costs(results, values)
 
     # EXP 2
-    with open('param.json', 'r') as f:
-        param = json.load(f)
-    # param['truckPolicy'] = param['truckPolicy'][0]
-    # param['nTrucks'] = 1
+    # with open('param.json', 'r') as f:
+    #     param = json.load(f)
 
-    results = std(param, for_internal_use=True)
-    with open('stats.json', 'w') as f:
-        json.dump(results, f)
+    # results = std(param, for_internal_use=True)
+    # with open('stats.json', 'w') as f:
+    #     json.dump(results, f)
     # stockpiles_level(results)
 
     # EXP 3
-    # with open('param.json', 'r') as f:
-    #     param = json.load(f)
-    # optimize_configuration(2*1e6, 10, param)
+    with open('param.json', 'r') as f:
+        param = json.load(f)
+    optimize_configuration(4*1e5, 30, param)

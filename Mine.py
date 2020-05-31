@@ -1,7 +1,7 @@
 import simpy,random
 from math import exp, sqrt
 
-DEBUG = True
+DEBUG = False
 
 class Truck(object):
     """
@@ -648,7 +648,7 @@ class DumpSite(Server):
     def __init__(self, env, id, coordinates, mu, sigma, maxCapacity, millRate):
         super().__init__(env, id, coordinates,mu,sigma)
         self.machine = MonitoredPriorityResource(env,capacity=1,item_id=self.id,item_type=self.__class__.__name__)
-        self.stockpile = simpy.Container(env, init=100)
+        self.stockpile = simpy.Container(env, init=100, capacity=maxCapacity)
         self.control = env.process(self.stockpile_control())
         self.milling = env.process(self.milling_machine(millRate))
         env.statistics[self.__class__.__name__+"%d" %self.id] = list()

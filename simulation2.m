@@ -25,7 +25,9 @@ param.nWorkShops = 2;
 param.initialTime = 0;       % The initial time of the simulation [minutes]
 param.simTime = 100000;      % Length of thesimulation [minutes]
 param.seed = 42;             % A value for the seed
-param.PMRule = "age_based";
+param.PMRule = "age_based";  % The maintenance policy
+param.millRate = 100;        % The total mill rate, i.e. it must be shared among all dumpsites [tons/hour]
+param.maxCapacity = 20000;   % The maximum capacity of all the stockpiles together [tons]
 
 % Encode the struct using JSON format
 json_format = jsonencode(param);
