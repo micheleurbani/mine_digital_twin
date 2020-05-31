@@ -307,7 +307,7 @@ class Truck(object):
         """
         x, candidate = 1e6, None
         for item in items:
-            time = self.distance(item.coordinates) + item.waitingTime()
+            time = item.waitingTime()# + self.distance(item.coordinates)
             if item.broken:
                 time += 1e4
             if time < x:
