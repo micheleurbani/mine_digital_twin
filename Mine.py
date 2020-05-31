@@ -693,7 +693,7 @@ class WorkShop(Server):
 
     def __init__(self, env, id, coordinates):
         super().__init__(env, id, coordinates)
-        self.machine = MonitoredResource(env,capacity=1,workshop_id=self.id)
+        self.machine = MonitoredResource(env,capacity=1,workshop_id=self.id,item_type=self.__class__.__name__)
         env.statistics["WorkShop%d"%self.id] = list()
 
     def correctiveRepair(self,equipment):
@@ -711,14 +711,15 @@ class WorkShop(Server):
 
 
 class MonitoredResource(simpy.PriorityResource):
-    def __init__(self, *args, workshop_id=None, **kwargs):
+    def __init__(self, *args, workshop_id=None, item_type=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = workshop_id
+        self.item_type = item_type
 
     def request(self, *args, **kwargs):
-        self._env.statistics["WorkShop%d"%self.id].append([self._env.now, len(self.queue)])
+        self._env.statistics[self.item_type + str(self.id)].append([self._env.now, len(self.queue)])
         return super().request(*args, **kwargs)
 
     def release(self, *args, **kwargs):
-        self._env.statistics["WorkShop%d"%self.id].append([self._env.now, len(self.queue)])
+        self._env.statistics[self.item_type + str(self.id)].append([self._env.now, len(self.queue)])
         return super().release(*args, **kwargs)
