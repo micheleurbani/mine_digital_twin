@@ -429,7 +429,7 @@ class Shovel(Server):
         self.sigmaPreventive = sigmaPreventive
         self.muCorrective = muCorrective
         self.sigmaCorrective = sigmaCorrective
-        self.machine = simpy.PreemptiveResource(env,capacity=1)
+        self.machine = MonitoredPreemptiveResource(env,capacity=1,item_id=self.id,item_type=self.__class__.__name__)
         self.nextFault = nextFault
         self.Cc = Cc
         self.Cp = Cp
@@ -688,6 +688,7 @@ class DumpSite(Server):
             yield self.stockpile.get(millRate/60*check_interval)
             self.env.statistics["DumpSite%d_stockpileLevel" %self.id].append([self.env.now, self.stockpile.level])
 
+
 class WorkShop(Server):
     """
     The class inherits the basic attributes from :class:`Server` and replicates the behavior of a workshop.
@@ -714,6 +715,21 @@ class WorkShop(Server):
 
 
 class MonitoredPriorityResource(simpy.PriorityResource):
+    def __init__(self, *args, item_id=None, item_type=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.id = item_id
+        self.item_type = item_type
+
+    def request(self, *args, **kwargs):
+        self._env.statistics[self.item_type + str(self.id) + "_queue"].append([self._env.now, len(self.queue)])
+        return super().request(*args, **kwargs)
+
+    def release(self, *args, **kwargs):
+        self._env.statistics[self.item_type + str(self.id) + "_queue"].append([self._env.now, len(self.queue)])
+        return super().release(*args, **kwargs)
+
+
+class MonitoredPreemptiveResource(simpy.PreemptiveResource):
     def __init__(self, *args, item_id=None, item_type=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = item_id
