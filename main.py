@@ -948,8 +948,8 @@ def variable_costs():
 def stockpiles_level(stats):
     import matplotlib.pyplot as plt
     import numpy as np
-    d0 = np.array(stats["DumpSite0"])
-    d1 = np.array(stats["DumpSite1"])
+    d0 = np.array(stats["DumpSite0_stockpileLevel"])
+    d1 = np.array(stats["DumpSite1_stockpileLevel"])
 
     plt.subplot(2,1,1)
     plt.step(d0[:,0], d0[:,1])
@@ -966,8 +966,6 @@ if __name__ == "__main__":
     # plot_costs(results, values)
 
     # EXP 2
-    # variable_costs()
-
     with open('param.json', 'r') as f:
         param = json.load(f)
     # param['truckPolicy'] = param['truckPolicy'][0]
@@ -976,8 +974,9 @@ if __name__ == "__main__":
     results = std(param, for_internal_use=True)
     with open('stats.json', 'w') as f:
         json.dump(results, f)
-    stockpiles_level(results)
-    # optimize_configuration(4, 10, param)
-    # best, score = GA(70, 13, 2*1e5)
-    # with open("results.json", "w") as f:
-    #     json.dump(best, f)
+    # stockpiles_level(results)
+
+    # EXP 3
+    # with open('param.json', 'r') as f:
+    #     param = json.load(f)
+    # optimize_configuration(2*1e6, 10, param)
