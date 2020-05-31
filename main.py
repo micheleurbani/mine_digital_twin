@@ -326,7 +326,14 @@ def fitness(SIM_TIME, seed, thresholds):
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
         dumpsiteData = [x for x in doc]
     dumpsites = [
-        DumpSite(env,i,coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),mu=dumpsiteData[i][0],sigma=dumpsiteData[i][1])
+        DumpSite(
+            env,
+            i,
+            coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),
+            mu=dumpsiteData[i][0],
+            sigma=dumpsiteData[i][1],
+            millRate=100,
+            maxCapacity=2*1e5)
         for i in range(2)]
 
     # TRUCK DECLARATION
@@ -469,7 +476,7 @@ def GA(initialPopSize, items, simTime):
             return x[:n]
 
     population = generateIndividuals(initialPopSize,items)
-    max_generations = 100
+    max_generations = 40
     stats = dict()
     stats['best'] = list()
     stats['average'] = list()
@@ -477,7 +484,7 @@ def GA(initialPopSize, items, simTime):
     for _ in tqdm(range(max_generations)):
 
         # Wrap parameters for the simulation
-        data = [(20, simTime, {"Shovels": ind[:3], "Trucks": ind[3:]}) for ind in population]
+        data = [(50, simTime, {"Shovels": ind[:3], "Trucks": ind[3:]}) for ind in population]
 
         with Pool(processes=60) as p:
             scores = list(p.starmap(multiFitness, data))
@@ -498,7 +505,7 @@ def GA(initialPopSize, items, simTime):
         stats['best'].append(scores[0])
         stats['average'].append(mean(scores))
         # New population
-        population = crossovered + mutated + list(population[:10])
+        population = mutated + list(population[:10])
 
     stats['thresholds'] = population[0]
     stats['score'] = scores[0]
@@ -975,6 +982,9 @@ if __name__ == "__main__":
     # stockpiles_level(results)
 
     # EXP 3
-    with open('param.json', 'r') as f:
-        param = json.load(f)
-    optimize_configuration(4*1e5, 30, param)
+    # with open('param.json', 'r') as f:
+    #     param = json.load(f)
+    # optimize_configuration(4*1e5, 30, param)
+
+    # EXP 4
+    best, _ = GA(initialPopSize=50, items=13, simTime=1e6)
