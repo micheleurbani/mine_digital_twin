@@ -973,13 +973,13 @@ if __name__ == "__main__":
     # plot_costs(results, values)
 
     # EXP 2
-    # with open('param.json', 'r') as f:
-    #     param = json.load(f)
+    with open('param.json', 'r') as f:
+        param = json.load(f)
 
-    # results = std(param, for_internal_use=True)
-    # with open('stats.json', 'w') as f:
-    #     json.dump(results, f)
-    # stockpiles_level(results)
+    results = std(param, for_internal_use=True)
+    with open('stats.json', 'w') as f:
+        json.dump(results, f)
+    stockpiles_level(results)
 
     # EXP 3
     # with open('param.json', 'r') as f:
@@ -987,4 +987,4 @@ if __name__ == "__main__":
     # optimize_configuration(4*1e5, 30, param)
 
     # EXP 4
-    best, _ = GA(initialPopSize=50, items=13, simTime=1e6)
+    # best, _ = GA(initialPopSize=50, items=13, simTime=1e6)
