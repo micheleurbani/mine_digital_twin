@@ -673,3 +673,33 @@ class WorkShop(Server):
 
     def waitingTime(self):
         return len(self.machine.queue) + self.machine.count
+
+
+class MonitoredPriorityResource(simpy.PriorityResource):
+    def __init__(self, *args, item_id=None, item_type=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.id = item_id
+        self.item_type = item_type
+
+    def request(self, *args, **kwargs):
+        self._env.statistics[self.item_type + str(self.id) + "_queue"].append([self._env.now, len(self.queue)])
+        return super().request(*args, **kwargs)
+
+    def release(self, *args, **kwargs):
+        self._env.statistics[self.item_type + str(self.id) + "_queue"].append([self._env.now, len(self.queue)])
+        return super().release(*args, **kwargs)
+
+
+class MonitoredPreemptiveResource(simpy.PreemptiveResource):
+    def __init__(self, *args, item_id=None, item_type=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.id = item_id
+        self.item_type = item_type
+
+    def request(self, *args, **kwargs):
+        self._env.statistics[self.item_type + str(self.id) + "_queue"].append([self._env.now, len(self.queue)])
+        return super().request(*args, **kwargs)
+
+    def release(self, *args, **kwargs):
+        self._env.statistics[self.item_type + str(self.id) + "_queue"].append([self._env.now, len(self.queue)])
+        return super().release(*args, **kwargs)
