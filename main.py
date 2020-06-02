@@ -286,7 +286,7 @@ def multiTest(nTrial,sim_time):
             nExceptions += 1
     print("There where %d exceptions." % nExceptions)
 
-def fitness(SIM_TIME, seed, thresholds):
+def fitness(SIM_TIME, seed, thresholds, param):
     """
     The function run a single instance of the simulation experiment with the given maintenance thresholds and returns the total cost of maintenance.
     By returning the total cost of maintenane we are weighting more corrective interventions.
@@ -345,8 +345,8 @@ def fitness(SIM_TIME, seed, thresholds):
             coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),
             mu=dumpsiteData[i][0],
             sigma=dumpsiteData[i][1],
-            millRate=100,
-            maxCapacity=2*1e5)
+            maxCapacity=param['maxCapacity']/param['nDumpSites'],
+            millRate=param['millRate']/param['nDumpSites'])
         for i in range(2)]
 
     # TRUCK DECLARATION
@@ -399,13 +399,13 @@ def fitness(SIM_TIME, seed, thresholds):
 
     return sumShovels + sumTrucks
 
-def multiFitness(nTrial, SIM_TIME, thresholds):
+def multiFitness(nTrial, SIM_TIME, thresholds, param):
     scores = list()
     for i in range(nTrial):
-        scores.append(fitness(SIM_TIME,seed=None,thresholds=thresholds))
+        scores.append(fitness(SIM_TIME,seed=None,thresholds=thresholds,param=param))
     return mean(scores)
 
-def GA(initialPopSize, nShovels, nTrucks, simTime):
+def GA(initialPopSize, nShovels, nTrucks, simTime, param):
     """
     A genetic algorithm which aim is to optimize maintenance thresholds.
 
@@ -495,17 +495,17 @@ def GA(initialPopSize, nShovels, nTrucks, simTime):
     for _ in tqdm(range(max_generations)):
 
         # Wrap parameters for the simulation
-        data = [(20, simTime, {"Shovels": ind[:nShovels], "Trucks": ind[nShovels:]}) for ind in population]
+        data = [(20, simTime, {"Shovels": ind[:nShovels], "Trucks": ind[nShovels:]}, param) for ind in population]
 
         with Pool(processes=60) as p:
             scores = list(p.starmap(multiFitness, data))
 
         # Selection of parents
-        parents = wheelOfFortune(population=population, scores=scores, n=15)
+        parents = wheelOfFortune(population=population, scores=scores, n=10)
         # Crossover
         # crossovered = crossover(n=20, parents=parents)
         # Mutation
-        mutated = mutation(n=40,parents=parents)
+        mutated = mutation(n=25,parents=parents)
         # Order the population and the scores
         zipped_sorted = sorted(zip(population, scores), key=lambda x: x[1])
         population, scores = list(), list()
@@ -516,7 +516,7 @@ def GA(initialPopSize, nShovels, nTrucks, simTime):
         stats['best'].append(scores[0])
         stats['average'].append(mean(scores))
         # New population
-        population = mutated + list(population[:10])
+        population = mutated + list(population[:5])
 
     stats['thresholds'] = population[0]
     stats['score'] = scores[0]
@@ -524,10 +524,10 @@ def GA(initialPopSize, nShovels, nTrucks, simTime):
     with open("results.json", "w") as f:
         json.dump(stats, f)
 
-    plt.plot(range(max_generations),stats['best'])
-    plt.plot(range(max_generations),stats['average'])
-    plt.legend(['Best', 'Average'])
-    plt.show()
+    # plt.plot(range(max_generations),stats['best'])
+    # plt.plot(range(max_generations),stats['average'])
+    # plt.legend(['Best', 'Average'])
+    # plt.show()
 
     return {"Shovels": population[0][:nShovels], "Trucks": population[0][nShovels:]}, scores[0]
 
@@ -603,10 +603,10 @@ def calculate_output(n, attempt_param, time_parameters=None):
         n = int(ceil(P * len(data)))
         return data[n-1]
 
-    with Pool() as p:
-        production_outputs = list(p.starmap(output_amount, [(attempt_param,) for _ in range(int(n))]))
+    # with Pool() as p:
+    #     production_outputs = list(p.starmap(output_amount, [(attempt_param,) for _ in range(int(n))]))
 
-    # production_outputs = [output_amount(attempt_param, time_parameters=time_parameters) for _ in range(int(n))]
+    production_outputs = [output_amount(attempt_param, time_parameters=time_parameters) for _ in range(int(n))]
     return percentile([x[0] for x in production_outputs], P=0.95), mean([x[1] for x in production_outputs])
 
 def change_configuration(nshovels, ntrucks, param):
@@ -687,6 +687,9 @@ def enumerate_configurations(target, n, param, shovels_ub=3, trucks_ub=10, time_
     for i in range(shovels_ub):
         for j in range(trucks_ub):
             attempt_param = change_configuration(i+1, j+1, param)
+            thresholds, score = GA(50, nShovels=i+1, nTrucks=j+1, simTime=attempt_param['simTime'], param=param)
+            attempt_param['shovelPolicy'] = thresholds['Shovels']
+            attempt_param['truckPolicy'] = thresholds['Trucks']
             # Estimate the production output for the initial configuration.
             guaranteed_output, cost = calculate_output(n, attempt_param)
             results.append([i+1, j+1, guaranteed_output, cost])
@@ -1027,10 +1030,10 @@ if __name__ == "__main__":
     # stockpiles_level(results)
 
     # EXP 3
-    # with open('param.json', 'r') as f:
-        # param = json.load(f)
-    # res = enumerate_configurations(4*1e5, 30, param)
-    # plot_throughput_surface()
+    with open('param.json', 'r') as f:
+        param = json.load(f)
+    res = enumerate_configurations(4*1e5, 30, param)
+    plot_throughput_surface()
 
     # EXP 4
-    best, _ = GA(initialPopSize=50, nShovels=2, nTrucks=5, simTime=1e6)
+    # best, _ = GA(initialPopSize=30, nShovels=2, nTrucks=5, simTime=1e6)
