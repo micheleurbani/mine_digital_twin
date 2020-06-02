@@ -149,18 +149,31 @@ def std(param, time_parameters=None, output=True, for_internal_use=False):
             print("Truck%d: \tFailures =" %i, env.statistics["Truck%d" %i]["Failure"], "\t Preventive =", env.statistics["Truck%d" %i]["PreventiveInterventions"])
         s = env.statistics["Truck%d"%i]["Statistics"]
         s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"]) / (param["simTime"])
+
         time_parameters["Truck%d"%i] = dict()
         time_parameters["Truck%d"%i]["LastMaintenance"] = trucks[i].lastMaintenance
         time_parameters["Truck%d"%i]["NextFault"] = trucks[i].nextFault
+
     for i in range(len(shovels)):
         if output:
             print("Shovel%d:\tFailures =" %i, env.statistics["Shovel%d" %i]["Failure"], "\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
         s = env.statistics["Shovel%d"%i]["Statistics"]
         s["Availability"] = 1 - (s["Failed"] + s["PMRepair"] + s["CMRepair"] + s['TravelTime']) / (param["simTime"])
         s["IdleTime"] = param["simTime"] - s["WorkingTime"] - s["TravelTime"] - s["TimeInQueue"] - s["Failed"] - s["PMRepair"] - s["CMRepair"]
+
         time_parameters["Shovel%d"%i] = dict()
         time_parameters["Shovel%d"%i]["LastMaintenance"] = shovels[i].lastMaintenance
         time_parameters["Shovel%d"%i]["NextFault"] = shovels[i].nextFault
+
+    sumShovels = sum([env.statistics['Shovel%d'%i]['Failure'] * shovels[i].Cc +
+                    env.statistics['Shovel%d'%i]['PreventiveInterventions'] * shovels[i].Cp
+                    for i in range(param['nShovels'])])
+
+    sumTrucks = sum([env.statistics['Truck%d'%i]['Failure'] * trucks[i].Cc +
+                    env.statistics['Truck%d'%i]['PreventiveInterventions'] * trucks[i].Cp
+                    for i in range(param['nTrucks'])])
+
+    env.statistics['TotalMaintenanceCost'] = sumShovels + sumTrucks
 
     if for_internal_use:
         return env.statistics
@@ -394,7 +407,7 @@ def multiFitness(nTrial, SIM_TIME, thresholds):
         scores.append(fitness(SIM_TIME,seed=None,thresholds=thresholds))
     return mean(scores)
 
-def GA(initialPopSize, items, simTime):
+def GA(initialPopSize, nShovels, nTrucks, simTime):
     """
     A genetic algorithm which aim is to optimize maintenance thresholds.
 
@@ -475,7 +488,7 @@ def GA(initialPopSize, items, simTime):
                 x.append(y)
             return x[:n]
 
-    population = generateIndividuals(initialPopSize,items)
+    population = generateIndividuals(initialPopSize,nShovels+nTrucks)
     max_generations = 40
     stats = dict()
     stats['best'] = list()
@@ -484,7 +497,7 @@ def GA(initialPopSize, items, simTime):
     for _ in tqdm(range(max_generations)):
 
         # Wrap parameters for the simulation
-        data = [(50, simTime, {"Shovels": ind[:3], "Trucks": ind[3:]}) for ind in population]
+        data = [(50, simTime, {"Shovels": ind[:nShovels], "Trucks": ind[nShovels:]}) for ind in population]
 
         with Pool(processes=60) as p:
             scores = list(p.starmap(multiFitness, data))
@@ -518,7 +531,7 @@ def GA(initialPopSize, items, simTime):
     plt.legend(['Best', 'Average'])
     plt.show()
 
-    return {"Shovels": population[0][:2], "Trucks": population[0][2:]}, scores[0]
+    return {"Shovels": population[0][:nShovels], "Trucks": population[0][nShovels:]}, scores[0]
 
 def mineMap(thresholds):
     """The function plots the position of sites within the mine."""
@@ -579,10 +592,11 @@ def mineMap(thresholds):
 def output_amount(param, time_parameters=None):
     results = std(param, time_parameters=time_parameters, output=False, for_internal_use=True)
     throughput = 0
+    # Calculate throughput
     for i in range(2):
         if len(results['DumpSite%d'%i]) > 0:
             throughput += sum([x[1] for x in results['DumpSite%d'%i]])
-    return throughput
+    return throughput, results['TotalMaintenanceCost']
 
 def calculate_output(n, attempt_param, time_parameters=None):
 
@@ -595,7 +609,7 @@ def calculate_output(n, attempt_param, time_parameters=None):
         production_outputs = list(p.starmap(output_amount, [(attempt_param,) for _ in range(int(n))]))
 
     # production_outputs = [output_amount(attempt_param, time_parameters=time_parameters) for _ in range(int(n))]
-    return percentile(production_outputs, P=0.95)
+    return percentile([x[0] for x in production_outputs], P=0.95), mean([x[1] for x in production_outputs])
 
 def change_configuration(nshovels, ntrucks, param):
     attempt_param = dict(param)
@@ -627,7 +641,7 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
 
     attempt_param = change_configuration(nshovels, ntrucks, param)
     # Estimate the production output for the initial configuration.
-    guaranteed_output = calculate_output(n, attempt_param)
+    guaranteed_output, cost = calculate_output(n, attempt_param)
     print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output} [ton]")
     i += 1
 
@@ -639,7 +653,7 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
             if nshovels + 1 <= shovels_ub: nshovels += 1
             else: test_shovels = True
             attempt_param = change_configuration(nshovels, ntrucks, param)
-            guaranteed_output = calculate_output(n, attempt_param)
+            guaranteed_output, cost = calculate_output(n, attempt_param)
 
             print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output} [ton]")
             i += 1
@@ -652,7 +666,7 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
             else:
                 ntrucks += 1
                 attempt_param = change_configuration(nshovels, ntrucks, param)
-                guaranteed_output = calculate_output(n, attempt_param)
+                guaranteed_output, cost = calculate_output(n, attempt_param)
                 test = True
                 print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output} [ton]")
                 i += 1
@@ -660,13 +674,46 @@ def optimize_configuration(target, n, param, shovels_ub=3, trucks_ub=10, time_pa
             if ntrucks - 1 >= trucks_lb:
                 ntrucks -= 1
                 attempt_param = change_configuration(nshovels, ntrucks, param)
-                guaranteed_output = calculate_output(n, attempt_param)
+                guaranteed_output, cost = calculate_output(n, attempt_param)
                 print(f"Iteration {i}: ntrucks = {ntrucks}, nshovels = {nshovels}. \t Guaranteed throughput {guaranteed_output} [ton]")
                 i += 1
             else:
                 test = True
 
     return ntrucks, nshovels
+
+def enumerate_configurations(target, n, param, shovels_ub=3, trucks_ub=10, time_parameters=None):
+
+    results = []
+
+    for i in range(shovels_ub):
+        for j in range(trucks_ub):
+            attempt_param = change_configuration(i+1, j+1, param)
+            # Estimate the production output for the initial configuration.
+            guaranteed_output, cost = calculate_output(n, attempt_param)
+            results.append([i+1, j+1, guaranteed_output, cost])
+            print(f"Iteration {i*trucks_ub+j+1}: ntrucks = {j+1}, nshovels = {i+1}. \t Guaranteed throughput {guaranteed_output} [ton]")
+
+    with open("out.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(results)
+
+    return results
+
+def plot_throughput_surface():
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+
+    with open("out.csv", "r") as f:
+        reader = csv.reader(f, quoting=csv.QUOTE_NONNUMERIC)
+        results = list(reader)
+
+    print(results)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(xs=[x[0] for x in results], ys=[x[1] for x in results], zs=[x[2] for x in results])
+    plt.show()
 
 def parametrizedP(a, sim_time, output=False):
 
@@ -973,18 +1020,19 @@ if __name__ == "__main__":
     # plot_costs(results, values)
 
     # EXP 2
-    with open('param.json', 'r') as f:
-        param = json.load(f)
-
-    results = std(param, for_internal_use=True)
-    with open('stats.json', 'w') as f:
-        json.dump(results, f)
-    stockpiles_level(results)
-
-    # EXP 3
     # with open('param.json', 'r') as f:
     #     param = json.load(f)
-    # optimize_configuration(4*1e5, 30, param)
+
+    # results = std(param, for_internal_use=True)
+    # with open('stats.json', 'w') as f:
+    #     json.dump(results, f)
+    # stockpiles_level(results)
+
+    # EXP 3
+    with open('param.json', 'r') as f:
+        param = json.load(f)
+    # res = enumerate_configurations(4*1e5, 30, param)
+    plot_throughput_surface()
 
     # EXP 4
     # best, _ = GA(initialPopSize=50, items=13, simTime=1e6)
