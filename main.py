@@ -389,15 +389,13 @@ def fitness(SIM_TIME, seed, thresholds):
         for i in range(len(shovels)):
             print("Shovel%d: Failures =" %i, env.statistics["Shovel%d" %i]["Failure"], ",\t Preventive =", env.statistics["Shovel%d" %i]["PreventiveInterventions"])
 
-    sumShovels = sum([env.statistics[item[1]]['Failure'] * shovels[item[0]].Cc +
-                    env.statistics[item[1]]['PreventiveInterventions'] * shovels[item[0]].Cp
-                    for item in enumerate(env.statistics.keys())
-                    if type(env.statistics[item[1]]) is dict and item[1][:-1] == "Shovel"])
+    sumShovels = sum([env.statistics["Shovel%d"%i]['Failure'] * shovels[i].Cc +
+                    env.statistics["Shovel%d"%i]['PreventiveInterventions'] * shovels[i].Cp
+                    for i in range(len(thresholds["Shovels"]))])
 
-    sumTrucks = sum([env.statistics[item[1]]['Failure'] * trucks[int(item[1][-1:])].Cc +
-                    env.statistics[item[1]]['PreventiveInterventions'] * trucks[int(item[1][-1:])].Cp
-                    for item in enumerate(env.statistics.keys())
-                    if type(env.statistics[item[1]]) is dict and item[1][:5] == "Truck"])
+    sumTrucks = sum([env.statistics["Truck%d"%i]['Failure'] * trucks[i].Cc +
+                    env.statistics["Truck%d"%i]['PreventiveInterventions'] * trucks[i].Cp
+                    for i in range(len(thresholds["Trucks"]))])
 
     return sumShovels + sumTrucks
 
@@ -489,7 +487,7 @@ def GA(initialPopSize, nShovels, nTrucks, simTime):
             return x[:n]
 
     population = generateIndividuals(initialPopSize,nShovels+nTrucks)
-    max_generations = 40
+    max_generations = 20
     stats = dict()
     stats['best'] = list()
     stats['average'] = list()
@@ -497,7 +495,7 @@ def GA(initialPopSize, nShovels, nTrucks, simTime):
     for _ in tqdm(range(max_generations)):
 
         # Wrap parameters for the simulation
-        data = [(50, simTime, {"Shovels": ind[:nShovels], "Trucks": ind[nShovels:]}) for ind in population]
+        data = [(20, simTime, {"Shovels": ind[:nShovels], "Trucks": ind[nShovels:]}) for ind in population]
 
         with Pool(processes=60) as p:
             scores = list(p.starmap(multiFitness, data))
@@ -505,7 +503,7 @@ def GA(initialPopSize, nShovels, nTrucks, simTime):
         # Selection of parents
         parents = wheelOfFortune(population=population, scores=scores, n=15)
         # Crossover
-        crossovered = crossover(n=20, parents=parents)
+        # crossovered = crossover(n=20, parents=parents)
         # Mutation
         mutated = mutation(n=40,parents=parents)
         # Order the population and the scores
@@ -1029,10 +1027,10 @@ if __name__ == "__main__":
     # stockpiles_level(results)
 
     # EXP 3
-    with open('param.json', 'r') as f:
-        param = json.load(f)
+    # with open('param.json', 'r') as f:
+        # param = json.load(f)
     # res = enumerate_configurations(4*1e5, 30, param)
-    plot_throughput_surface()
+    # plot_throughput_surface()
 
     # EXP 4
-    # best, _ = GA(initialPopSize=50, items=13, simTime=1e6)
+    best, _ = GA(initialPopSize=50, nShovels=2, nTrucks=5, simTime=1e6)
