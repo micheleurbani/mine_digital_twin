@@ -768,20 +768,23 @@ def mtbf_vs_cost_downtime(values):
 
     random.seed(42)
     sim_time = 1e5
-    N = 5
+    N = 25
     results = np.ndarray((len(values), N, 2))
 
     for i in tqdm(range(len(values))):
         for j in range(N):
-            results[i,j,0], results[i,j,1] = parametrizedP(values[i], sim_time)
+            results[i,j,0], results[i,j,1] = parametrizedP(values[i], sim_time, output=True)
 
     np.save("costs", results)
 
 def plot_costs(results, values):
     import numpy as np
+    import matplotlib.pyplot as plt
 
     CM = np.mean(results[:,:,0], axis=1)/1000
     PM = np.mean(results[:,:,1], axis=1)/1000
+    to_csv = np.transpose(np.array([values, CM, PM, CM+PM]))
+    np.savetxt("mtbf_vs_cost.dat", to_csv, delimiter="\t", fmt="%.3f")
     plt.plot(values, CM, values, PM, values, CM+PM)
     plt.fill_between(values, CM, PM, where=CM >= PM, facecolor='#F7C8C1')
     plt.fill_between(values, CM, PM, where=PM >= CM, facecolor='#C1D9F7')
@@ -793,13 +796,13 @@ def plot_costs(results, values):
     plt.show()
 
 if __name__ == "__main__":
-    pass
-    # values = [1, 2, 3, 5, 10, 18, 20, 30, 50, 70]
+    # pass
+    values = [1, 2, 3, 5, 10, 18, 20, 30, 50, 70]
 
     # mtbf_vs_cost_downtime(values)
-    # import numpy as np
-    # results = np.load("costs.npy")
-    # plot_costs(results, values)
+    import numpy as np
+    results = np.load("costs.npy")
+    plot_costs(results, values)
 
     # with open('param.json', 'r') as f:
     #     param = json.load(f)
