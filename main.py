@@ -309,7 +309,7 @@ def fitness(SIM_TIME, seed, thresholds, param):
         workshopsData = [x for x in doc]
     workshops = [
         WorkShop(env,i,(workshopsData[i][0],workshopsData[i][1]))
-        for i in range(2)]
+        for i in range(param['nWorkShops'])]
 
     # SHOVEL DECLARATION
     with open("data/shovels_data.csv","r",newline="\n") as f:
@@ -347,7 +347,7 @@ def fitness(SIM_TIME, seed, thresholds, param):
             sigma=dumpsiteData[i][1],
             maxCapacity=param['maxCapacity']/param['nDumpSites'],
             millRate=param['millRate']/param['nDumpSites'])
-        for i in range(2)]
+        for i in range(param['nDumpSites'])]
 
     # TRUCK DECLARATION
     with open("data/truck_data.csv","r",newline="\n") as f:
