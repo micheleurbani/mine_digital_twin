@@ -684,7 +684,7 @@ def enumerate_configurations(target, n, param, shovels_ub=3, trucks_ub=10, time_
 
     results = []
 
-    for i in range(shovels_ub):
+    for i in [2]:
         for j in range(trucks_ub):
             attempt_param = change_configuration(i+1, j+1, param)
             thresholds, score = GA(50, nShovels=i+1, nTrucks=j+1, simTime=attempt_param['simTime'], param=param)
@@ -705,7 +705,7 @@ def plot_throughput_surface():
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
 
-    with open("out.csv", "r") as f:
+    with open("results/config_optimization3.csv", "r") as f:
         reader = csv.reader(f, quoting=csv.QUOTE_NONNUMERIC)
         results = list(reader)
 
@@ -1022,11 +1022,11 @@ def stockpiles_level(stats):
 
 if __name__ == "__main__":
     # EXP 1
-    values = [0.01, 0.2, 0.5, 0.7, 1, 2, 3, 5, 10]
-    mtbf_vs_cost_downtime(values)
-    import numpy as np
-    results = np.load("costs.npy")
-    plot_costs(results, values)
+    # values = [0.01, 0.2, 0.5, 0.7, 1, 2, 3, 5, 10]
+    # mtbf_vs_cost_downtime(values)
+    # import numpy as np
+    # results = np.load("costs.npy")
+    # plot_costs(results, values)
 
     # EXP 2
     # with open('param.json', 'r') as f:
@@ -1038,10 +1038,10 @@ if __name__ == "__main__":
     # stockpiles_level(results)
 
     # EXP 3
-    # with open('param.json', 'r') as f:
-    #     param = json.load(f)
+    with open('param.json', 'r') as f:
+        param = json.load(f)
     # res = enumerate_configurations(4*1e5, 30, param)
-    # plot_throughput_surface()
+    plot_throughput_surface()
 
     # EXP 4
     # best, _ = GA(initialPopSize=30, nShovels=2, nTrucks=5, simTime=1e6)
