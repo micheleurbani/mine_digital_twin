@@ -689,9 +689,9 @@ def parametrizedP(a, sim_time, output=False):
             beta=shovelsData[i][9],
             Cc=shovelsData[i][10],
             Cp=shovelsData[i][11],
-            p=a * shovelsData[i][8] * gamma(1 + 1/shovelsData[i][9]),
+            p=a * shovelsData[i][8] * gamma(1 + 1/shovelsData[i][9]) * 60,
             workshops=workshops)
-        for i in range(3)]
+        for i in range(1)]
 
     with open("data/dumpsites_data.csv","r",newline="\n") as f:
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
@@ -712,7 +712,7 @@ def parametrizedP(a, sim_time, output=False):
         sigmaPreventive=truckData[i][5],
         Cc=truckData[i][2],
         Cp=truckData[i][3],
-        p=a * truckData[i][0] * gamma(1 + 1/truckData[i][1]),
+        p=a * truckData[i][0] * gamma(1 + 1/truckData[i][1]) * 60,
         env=env,
         id=i,
         shovels=shovels,
@@ -720,7 +720,7 @@ def parametrizedP(a, sim_time, output=False):
         workshops=workshops,
         muCapacity=truckData[i][8],
         sigmaCapacity=truckData[i][9])
-        for i in range(10)]
+        for i in range(3)]
 
     begin = datetime.now()
     # Stick the policy to the classes Shovel and Trucks
@@ -730,8 +730,7 @@ def parametrizedP(a, sim_time, output=False):
     env.run(until=sim_time)
 
     time_parameters = dict()
-    CMcost = 0
-    PMcost = 0
+    CMcost, PMcost, CMamount, PMamount = 0, 0, 0, 0
 
     # Results and statistics update
     for i in range(len(trucks)):
@@ -744,6 +743,8 @@ def parametrizedP(a, sim_time, output=False):
         del env.statistics["Truck%d"%i]["History"]
         CMcost += trucks[i].Cc * env.statistics["Truck%d"%i]["Failure"]
         PMcost += trucks[i].Cp * env.statistics["Truck%d"%i]["PreventiveInterventions"]
+        CMamount += env.statistics["Truck%d"%i]["Failure"]
+        PMamount += env.statistics["Truck%d"%i]["PreventiveInterventions"]
 
     for i in range(len(shovels)):
         if output:
@@ -756,24 +757,26 @@ def parametrizedP(a, sim_time, output=False):
         del env.statistics["Shovel%d"%i]["History"]
         CMcost += shovels[i].Cc * env.statistics["Shovel%d"%i]["Failure"]
         PMcost += shovels[i].Cp * env.statistics["Shovel%d"%i]["PreventiveInterventions"]
+        CMamount += env.statistics["Shovel%d"%i]["Failure"]
+        PMamount += env.statistics["Shovel%d"%i]["PreventiveInterventions"]
 
     for i in range(2):
         del env.statistics["DumpSite%d"%i]
 
-    return CMcost, PMcost
+    return CMcost, PMcost, CMamount, PMamount
 
 def mtbf_vs_cost_downtime(values):
     from tqdm import tqdm
     import numpy as np
 
     random.seed(42)
-    sim_time = 1e5
-    N = 25
-    results = np.ndarray((len(values), N, 2))
+    sim_time = 1e6
+    N = 30
+    results = np.ndarray((len(values), N, 4))
 
     for i in tqdm(range(len(values))):
         for j in range(N):
-            results[i,j,0], results[i,j,1] = parametrizedP(values[i], sim_time, output=True)
+            results[i,j,0], results[i,j,1], results[i,j,2], results[i,j,3] = parametrizedP(values[i], sim_time, output=True)
 
     np.save("costs", results)
 
@@ -783,23 +786,26 @@ def plot_costs(results, values):
 
     CM = np.mean(results[:,:,0], axis=1)/1000
     PM = np.mean(results[:,:,1], axis=1)/1000
+    CMamount = np.mean(results[:,:,2], axis=1)/1000
+    PMamount = np.mean(results[:,:,3], axis=1)/1000
     to_csv = np.transpose(np.array([values, CM, PM, CM+PM]))
     np.savetxt("mtbf_vs_cost.dat", to_csv, delimiter="\t", fmt="%.3f")
     plt.plot(values, CM, values, PM, values, CM+PM)
+    # plt.plot(values, CMamount, values, PMamount, values, CMamount+PMamount)
     plt.fill_between(values, CM, PM, where=CM >= PM, facecolor='#F7C8C1')
     plt.fill_between(values, CM, PM, where=PM >= CM, facecolor='#C1D9F7')
     plt.xlabel("a")
     plt.title("Total Cost of CM/PM")
     plt.ylabel("Cost")
     plt.legend(["CM cost", "PM cost", "Total cost"])
+    # plt.legend(["CMamount", "PMamount", "Total cost"])
     plt.savefig("figures/costs1.png")
     plt.show()
 
 if __name__ == "__main__":
     # pass
-    values = [1, 2, 3, 5, 10, 18, 20, 30, 50, 70]
-
-    # mtbf_vs_cost_downtime(values)
+    values = [0.01, 0.25, 0.5, 0.75, 1, 2, 3]
+    mtbf_vs_cost_downtime(values)
     import numpy as np
     results = np.load("costs.npy")
     plot_costs(results, values)
