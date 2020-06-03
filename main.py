@@ -804,9 +804,9 @@ def plot_costs(results, values):
 
 if __name__ == "__main__":
     # pass
-    values = [0.01, 0.25, 0.5, 0.75, 1, 2, 3]
-    mtbf_vs_cost_downtime(values)
     import numpy as np
+    values = np.hstack((np.linspace(0,2,25), np.linspace(2.2,3,10)))
+    mtbf_vs_cost_downtime(values)
     results = np.load("costs.npy")
     plot_costs(results, values)
 
