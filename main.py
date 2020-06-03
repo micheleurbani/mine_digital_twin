@@ -757,7 +757,14 @@ def parametrizedP(a, sim_time, output=False):
         doc = csv.reader(f,delimiter=",",quoting=csv.QUOTE_NONNUMERIC)
         dumpsiteData = [x for x in doc]
     dumpsites = [
-        DumpSite(env,i,coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),mu=dumpsiteData[i][0],sigma=dumpsiteData[i][1])
+        DumpSite(
+            env,
+            i,
+            coordinates=(dumpsiteData[i][2],dumpsiteData[i][3]),
+            mu=dumpsiteData[i][0],
+            sigma=dumpsiteData[i][1],
+            millRate=500,
+            maxCapacity=1e7)
         for i in range(2)]
 
     with open("data/truck_data.csv","r",newline="\n") as f:
@@ -932,9 +939,9 @@ def mtbf_vs_cost_downtime(values):
     from tqdm import tqdm
     import numpy as np
 
-    random.seed(42)
-    sim_time = 1e5
-    N = 5
+    # random.seed(42)
+    sim_time = 1e6
+    N = 20
     results = np.ndarray((len(values), N, 2))
 
     for i in tqdm(range(len(values))):
@@ -945,6 +952,7 @@ def mtbf_vs_cost_downtime(values):
 
 def plot_costs(results, values):
     import numpy as np
+    import matplotlib.pyplot as plt
 
     CM = np.mean(results[:,:,0], axis=1)/1000
     PM = np.mean(results[:,:,1], axis=1)/1000
@@ -1014,11 +1022,11 @@ def stockpiles_level(stats):
 
 if __name__ == "__main__":
     # EXP 1
-    # values = [1, 2, 3, 5, 10, 18, 20, 30, 50, 70]
-    # mtbf_vs_cost_downtime(values)
-    # import numpy as np
-    # results = np.load("costs.npy")
-    # plot_costs(results, values)
+    values = [0.01, 0.2, 0.5, 0.7, 1, 2, 3, 5, 10]
+    mtbf_vs_cost_downtime(values)
+    import numpy as np
+    results = np.load("costs.npy")
+    plot_costs(results, values)
 
     # EXP 2
     # with open('param.json', 'r') as f:
@@ -1030,10 +1038,10 @@ if __name__ == "__main__":
     # stockpiles_level(results)
 
     # EXP 3
-    with open('param.json', 'r') as f:
-        param = json.load(f)
-    res = enumerate_configurations(4*1e5, 30, param)
-    plot_throughput_surface()
+    # with open('param.json', 'r') as f:
+    #     param = json.load(f)
+    # res = enumerate_configurations(4*1e5, 30, param)
+    # plot_throughput_surface()
 
     # EXP 4
     # best, _ = GA(initialPopSize=30, nShovels=2, nTrucks=5, simTime=1e6)
