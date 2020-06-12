@@ -684,7 +684,7 @@ def enumerate_configurations(target, n, param, shovels_ub=3, trucks_ub=10, time_
 
     results = []
 
-    for i in [2]:
+    for i in range(shovels_ub):
         for j in range(trucks_ub):
             attempt_param = change_configuration(i+1, j+1, param)
             thresholds, score = GA(50, nShovels=i+1, nTrucks=j+1, simTime=attempt_param['simTime'], param=param)
@@ -695,7 +695,7 @@ def enumerate_configurations(target, n, param, shovels_ub=3, trucks_ub=10, time_
             results.append([i+1, j+1, guaranteed_output, cost])
             print(f"Iteration {i*trucks_ub+j+1}: ntrucks = {j+1}, nshovels = {i+1}. \t Guaranteed throughput {guaranteed_output} [ton]")
 
-    with open("out.csv", "w", newline="") as f:
+    with open("results/config_optimization2cm.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(results)
 
@@ -705,7 +705,7 @@ def plot_throughput_surface():
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
 
-    with open("results/config_optimization3.csv", "r") as f:
+    with open("results/config_optimization2cm.csv", "r") as f:
         reader = csv.reader(f, quoting=csv.QUOTE_NONNUMERIC)
         results = list(reader)
 
@@ -1040,7 +1040,7 @@ if __name__ == "__main__":
     # EXP 3
     with open('param.json', 'r') as f:
         param = json.load(f)
-    # res = enumerate_configurations(4*1e5, 30, param)
+    res = enumerate_configurations(4*1e5, 50, param)
     plot_throughput_surface()
 
     # EXP 4
